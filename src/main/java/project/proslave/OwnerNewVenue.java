@@ -110,7 +110,7 @@ public class OwnerNewVenue {
         List<Menu> menus = new ArrayList<>();
         String[] menuLines = input.replace("\r\n", "\n").split("\n");
         for (String line : menuLines) {
-            String[] parts = line.trim().split(",", 2);
+            String[] parts = line.trim().split(": ", 2);
             if (parts.length == 2) {
                 String description = parts[0].trim();
                 String priceStr = parts[1].trim();

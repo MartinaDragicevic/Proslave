@@ -107,7 +107,7 @@
                   <Font name="Berlin Sans FB" size="18.0" />
                </font>
             </Text>
-            <Text fill="WHITE" layoutX="159.0" layoutY="382.0" strokeType="OUTSIDE" strokeWidth="0.0" text="(offer of different menus - menu description with information on the price of that menu for one person)" wrappingWidth="744.1484375">
+            <Text fill="WHITE" layoutX="161.0" layoutY="382.0" strokeType="OUTSIDE" strokeWidth="0.0" text="(Input must be in this format -&gt; Juice: 5)" wrappingWidth="302.0986328125">
                <font>
                   <Font name="Berlin Sans FB" size="17.0" />
                </font>
