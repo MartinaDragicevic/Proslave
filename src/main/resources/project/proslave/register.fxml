@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.InnerShadow?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="scene_register" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="504.0" prefWidth="782.0" styleClass="login_background" stylesheets="@../../css/css_file.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="project.proslave.Register">
+   <children>
+      <Label layoutX="14.0" layoutY="14.0" onMouseClicked="#backToLoginText" prefHeight="26.0" prefWidth="61.0" styleClass="black_button" stylesheets="@../../css/css_file.css" text="← Back">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+         <font>
+            <Font name="Berlin Sans FB" size="14.0" />
+         </font>
+      </Label>
+      <AnchorPane layoutX="144.0" layoutY="74.0" opacity="0.6" prefHeight="370.0" prefWidth="475.0" style="-fx-background-color: #b4b4b4;">
+         <children>
+            <Label fx:id="errorLabel" alignment="CENTER" layoutX="71.0" layoutY="66.0" prefHeight="20.0" prefWidth="346.0">
+               <font>
+                  <Font size="14.0" />
+               </font></Label>
+         </children>
+         <styleClass>
+            <String fx:value="round" />
+            <String fx:value="border" />
+         </styleClass>
+         <effect>
+            <InnerShadow>
+               <color>
+                  <Color red="1.0" green="1.0" blue="1.0" />
+               </color>
+            </InnerShadow>
+         </effect>
+      </AnchorPane>
+      <Label layoutX="274.0" layoutY="391.0" text="Already have an account?">
+         <font>
+            <Font name="Berlin Sans FB" size="14.0" />
+         </font>
+      </Label>
+      <TextField fx:id="usernameField" layoutX="233.0" layoutY="164.0" prefHeight="26.0" prefWidth="306.0" promptText="Username..." style="-fx-background-color: gray;" stylesheets="@../../css/css_file.css">
+         <styleClass>
+            <String fx:value="round" />
+            <String fx:value="white_button" />
+         </styleClass></TextField>
+      <TextField fx:id="bankAccountField" layoutX="231.0" layoutY="230.0" prefHeight="26.0" prefWidth="307.0" promptText="Bank Acc Number..." style="-fx-background-color: gray;" stylesheets="@../../css/css_file.css">
+         <styleClass>
+            <String fx:value="round" />
+            <String fx:value="white_button" />
+         </styleClass></TextField>
+      <TextField fx:id="jmbgField" layoutX="390.0" layoutY="263.0" promptText="JMBG..." style="-fx-background-color: gray;" stylesheets="@../../css/css_file.css">
+         <styleClass>
+            <String fx:value="round" />
+            <String fx:value="white_button" />
+         </styleClass></TextField>
+      <TextField fx:id="lastNameField" layoutX="390.0" layoutY="197.0" promptText="Last Name..." style="-fx-background-color: gray;" stylesheets="@../../css/css_file.css">
+         <styleClass>
+            <String fx:value="round" />
+            <String fx:value="white_button" />
+         </styleClass></TextField>
+      <TextField fx:id="firstNameField" layoutX="232.0" layoutY="197.0" promptText="First Name..." style="-fx-background-color: gray;" stylesheets="@../../css/css_file.css">
+         <styleClass>
+            <String fx:value="round" />
+            <String fx:value="white_button" />
+         </styleClass></TextField>
+      <TextField fx:id="phoneNumberField" layoutX="232.0" layoutY="263.0" promptText="Phone Number..." style="-fx-background-color: gray;" stylesheets="@../../css/css_file.css">
+         <styleClass>
+            <String fx:value="round" />
+            <String fx:value="white_button" />
+         </styleClass></TextField>
+      <PasswordField fx:id="passwordField" layoutX="232.0" layoutY="296.0" promptText="Password..." style="-fx-background-color: gray;" stylesheets="@../../css/css_file.css">
+         <styleClass>
+            <String fx:value="round" />
+            <String fx:value="white_button" />
+         </styleClass></PasswordField>
+      <PasswordField fx:id="confirmPasswordField" layoutX="390.0" layoutY="296.0" promptText="Confirm Password..." style="-fx-background-color: gray;" stylesheets="@../../css/css_file.css">
+         <styleClass>
+            <String fx:value="round" />
+            <String fx:value="white_button" />
+         </styleClass></PasswordField>
+      <Label layoutX="431.0" layoutY="391.0" onMouseClicked="#backToLoginText" text="Log In" underline="true">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+         <font>
+            <Font name="Berlin Sans FB" size="14.0" />
+         </font>
+      </Label>
+      <Label alignment="CENTER" layoutX="181.0" layoutY="104.0" prefHeight="36.0" prefWidth="400.0" text="CREATE NEW ACCOUNT">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Label>
+      <Button fx:id="ownerButton" layoutX="388.0" layoutY="355.0" mnemonicParsing="false" onAction="#createAccount" prefHeight="27.0" prefWidth="149.0" style="-fx-background-color: black; -fx-border-color: white;" styleClass="round" stylesheets="@../../css/css_file.css" text="Create Owner Account" textFill="WHITE">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </Button>
+      <Button fx:id="clientButton" layoutX="229.0" layoutY="355.0" mnemonicParsing="false" onAction="#createAccount" prefHeight="27.0" prefWidth="149.0" style="-fx-background-color: black; -fx-border-color: white;" styleClass="round" stylesheets="@../../css/css_file.css" text="Create User Account" textFill="WHITE">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </Button>
+   </children>
+</AnchorPane>

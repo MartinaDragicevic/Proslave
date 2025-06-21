@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane prefHeight="700.0" prefWidth="1200.0" styleClass="background" stylesheets="@../../css/css_file.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="project.proslave.OwnerNewVenue">
+   <children>
+      <Label layoutX="22.0" layoutY="15.0" onMouseClicked="#backToDashboard" prefHeight="26.0" prefWidth="61.0" styleClass="black_button" stylesheets="@../../css/css_file.css" text="← Back">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+         <font>
+            <Font name="Berlin Sans FB" size="14.0" />
+         </font>
+      </Label>
+      <AnchorPane layoutX="54.0" layoutY="61.0" opacity="0.59" prefHeight="607.0" prefWidth="1087.0" style="-fx-background-color: #002e8a; -fx-border-color: black; -fx-border-width: 1;" styleClass="round" stylesheets="@../../css/css_file.css">
+         <children>
+            <TextField fx:id="venueName" layoutX="99.0" layoutY="48.0" prefHeight="31.0" prefWidth="382.0" promptText="Venue Name....">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </TextField>
+            <TextField fx:id="reservationPrice" layoutX="98.0" layoutY="170.0" prefHeight="31.0" prefWidth="382.0" promptText="Reservation Price...">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </TextField>
+            <TextField fx:id="venuePlace" layoutX="580.0" layoutY="137.0" prefHeight="31.0" prefWidth="382.0" promptText="Place...">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </TextField>
+            <TextField fx:id="venueAddress" layoutX="581.0" layoutY="48.0" prefHeight="31.0" prefWidth="382.0" promptText="Venue Address...">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </TextField>
+            <TextField fx:id="maxSeatsNumber" layoutX="98.0" layoutY="273.0" prefHeight="31.0" prefWidth="382.0" promptText="Max Number...">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </TextField>
+            <TextField fx:id="tablesNumber" layoutX="582.0" layoutY="206.0" prefHeight="31.0" prefWidth="382.0" promptText="Number of Tables...">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </TextField>
+            <TextArea fx:id="textArea" layoutX="69.0" layoutY="397.0" prefHeight="146.0" prefWidth="944.0" />
+            <Text fill="WHITE" layoutX="99.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Venue Name">
+               <font>
+                  <Font name="Berlin Sans FB" size="17.0" />
+               </font>
+            </Text>
+            <Text fill="WHITE" layoutX="100.0" layoutY="141.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Reservation Price">
+               <font>
+                  <Font name="Berlin Sans FB" size="17.0" />
+               </font>
+            </Text>
+            <Text fill="WHITE" layoutX="98.0" layoutY="160.0" strokeType="OUTSIDE" strokeWidth="0.0" text="(how much does a client need to pay to book a venue)">
+               <font>
+                  <Font name="Berlin Sans FB" size="17.0" />
+               </font>
+            </Text>
+            <Text fill="WHITE" layoutX="99.0" layoutY="260.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Maximum number of seats in the venue">
+               <font>
+                  <Font name="Berlin Sans FB" size="17.0" />
+               </font>
+            </Text>
+            <Text fill="WHITE" layoutX="581.0" layoutY="38.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Exact address of the venue">
+               <font>
+                  <Font name="Berlin Sans FB" size="17.0" />
+               </font>
+            </Text>
+            <Text fill="WHITE" layoutX="580.0" layoutY="112.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Place in which the venue is located">
+               <font>
+                  <Font name="Berlin Sans FB" size="17.0" />
+               </font>
+            </Text>
+            <Text fill="WHITE" layoutX="581.0" layoutY="200.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Number of the Tables in Venue">
+               <font>
+                  <Font name="Berlin Sans FB" size="17.0" />
+               </font>
+            </Text>
+            <Text fill="WHITE" layoutX="580.0" layoutY="130.0" strokeType="OUTSIDE" strokeWidth="0.0" text="(City/Town)">
+               <font>
+                  <Font name="Berlin Sans FB" size="17.0" />
+               </font>
+            </Text>
+            <TextField fx:id="peopleNumber" layoutX="582.0" layoutY="276.0" prefHeight="31.0" prefWidth="382.0" promptText="Number of People...">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </TextField>
+            <Text fill="WHITE" layoutX="581.0" layoutY="271.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Number of people who can sit at one table">
+               <font>
+                  <Font name="Berlin Sans FB" size="17.0" />
+               </font>
+            </Text>
+            <Text fill="WHITE" layoutX="71.0" layoutY="382.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Description">
+               <font>
+                  <Font name="Berlin Sans FB" size="18.0" />
+               </font>
+            </Text>
+            <Text fill="WHITE" layoutX="159.0" layoutY="382.0" strokeType="OUTSIDE" strokeWidth="0.0" text="(offer of different menus - menu description with information on the price of that menu for one person)" wrappingWidth="744.1484375">
+               <font>
+                  <Font name="Berlin Sans FB" size="17.0" />
+               </font>
+            </Text>
+         </children>
+      </AnchorPane>
+      <Text layoutX="531.0" layoutY="43.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Add New Venue">
+         <font>
+            <Font name="Berlin Sans FB" size="23.0" />
+         </font>
+      </Text>
+      <Button layoutX="126.0" layoutY="616.0" mnemonicParsing="false" onAction="#addNewVenue" prefHeight="31.0" prefWidth="122.0" style="-fx-background-color: black;" styleClass="round" stylesheets="@../../css/css_file.css" text="Submit" textFill="WHITE">
+         <font>
+            <Font name="Berlin Sans FB" size="17.0" />
+         </font>
+      </Button>
+   </children>
+</AnchorPane>
