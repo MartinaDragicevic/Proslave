@@ -1,6 +1,7 @@
 package project.proslave;
 
 import Database.Database;
+import SistemZaPlaniranjeProslava.Menu;
 import SistemZaPlaniranjeProslava.Venue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,6 +15,8 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OwnerNewVenue {
 
@@ -21,10 +24,10 @@ public class OwnerNewVenue {
     @FXML private TextField venueAddress;
     @FXML private TextField venuePlace;
     @FXML private TextField maxSeatsNumber;
-    @FXML private TextField seatsPerTable;
+    @FXML private TextField peopleNumber;
     @FXML private TextField tablesNumber;
     @FXML private TextField reservationPrice;
-    @FXML private TextArea menuTextArea;
+    @FXML private TextArea textArea;
 
     private int currentVlasnikId = 1;
 
@@ -33,15 +36,21 @@ public class OwnerNewVenue {
         String address = venueAddress.getText().trim();
         String place = venuePlace.getText().trim();
         String maxSeats = maxSeatsNumber.getText().trim();
-        String seatsPerTableStr = seatsPerTable.getText().trim();
+        String seatsPerTableStr = peopleNumber.getText().trim();
         String tables = tablesNumber.getText().trim();
         String price = reservationPrice.getText().trim();
-        String menuInput = menuTextArea.getText().trim();
+        String menuInput = textArea.getText().trim();
 
-        if (name.isEmpty() || address.isEmpty() || place.isEmpty() || maxSeats.isEmpty() || seatsPerTableStr.isEmpty() || tables.isEmpty() || price.isEmpty() || menuInput.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Please fill out all fields!"); return;
-        }else if (!isPositiveInteger(maxSeats) || !isPositiveInteger(seatsPerTableStr) || !isPositiveInteger(tables) || !isPositiveDecimal(price)) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Ensure numeric fields contain positive numbers."); return;
+        if (name.isEmpty() || address.isEmpty() || place.isEmpty() || maxSeats.isEmpty() ||
+                seatsPerTableStr.isEmpty() || tables.isEmpty() || price.isEmpty() || menuInput.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Please fill out all fields!");
+            return;
+        }
+
+        if (!isPositiveInteger(maxSeats) || !isPositiveInteger(seatsPerTableStr) ||
+                !isPositiveInteger(tables) || !isPositiveDecimal(price)) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Ensure numeric fields contain positive numbers.");
+            return;
         }
 
         int maxSeatsInt = Integer.parseInt(maxSeats);
@@ -50,33 +59,33 @@ public class OwnerNewVenue {
         double priceDouble = Double.parseDouble(price);
 
         if (maxSeatsInt < seatsPerTableInt * tablesInt) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Total seats cannot be less than seats per table times number of tables.");
+            showAlert(Alert.AlertType.ERROR, "Error", "Total seats must be at least " +
+                    (seatsPerTableInt * tablesInt) + " (seats per table × number of tables).");
             return;
         }
 
-        String[] menuItems = menuInput.split(";");
-        for (String menuItem : menuItems) {
-            String[] delovi = menuItem.trim().split(":");
-            if (delovi.length != 2 || !isPositiveDecimal(delovi[1].trim())) {
-                showAlert(Alert.AlertType.ERROR, "Greška", "Neispravan format menija. Koristite 'opis:cjena;opis:cjena'.");
-                return;
-            }
+        List<Menu> menus = parseMenus(menuInput);
+        if (menus.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Please provide at least one valid menu (format: description,price).");
+            return;
         }
 
-        /*try {
-            Database.addNewVenueToDatabase(int currentVlasnikId, String name, double priceDouble, String place, String address, int maxSeatsInt, int tablesInt, int seatsPerTableInt, menuItems);
+        try {
+            Venue newVenue = new Venue(0, name, address, place, maxSeatsInt, priceDouble, currentVlasnikId, "NA ČEKANJU", tablesInt, null, 0.0);
+            Database.addVenue(newVenue, tablesInt, seatsPerTableInt, menus);
+
             showAlert(Alert.AlertType.INFORMATION, "Success", "Venue added successfully!");
             venueName.clear();
             venueAddress.clear();
             venuePlace.clear();
             maxSeatsNumber.clear();
-            seatsPerTable.clear();
+            peopleNumber.clear();
             tablesNumber.clear();
             reservationPrice.clear();
-            menuTextArea.clear();
+            textArea.clear();
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to add venue: " + e.getMessage());
-        }*/
+        }
     }
 
     private boolean isPositiveInteger(String str) {
@@ -95,6 +104,27 @@ public class OwnerNewVenue {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    private List<Menu> parseMenus(String input) {
+        List<Menu> menus = new ArrayList<>();
+        String[] menuLines = input.replace("\r\n", "\n").split("\n");
+        for (String line : menuLines) {
+            String[] parts = line.trim().split(",", 2);
+            if (parts.length == 2) {
+                String description = parts[0].trim();
+                String priceStr = parts[1].trim();
+                try {
+                    double price = Double.parseDouble(priceStr);
+                    if (!description.isEmpty() && price > 0) {
+                        menus.add(new Menu(0, description, price));
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Error! Wrong input" + e.getMessage());
+                }
+            }
+        }
+        return menus;
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {

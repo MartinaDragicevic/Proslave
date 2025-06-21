@@ -175,6 +175,74 @@ public class Database {
     }
 
 
+    public static void addVenue(Venue venue, int tablesNumber, int seatsPerTable, List<Menu> menus) throws SQLException {
+        Connection conn = null;
+        PreparedStatement venueStmt = null;
+        PreparedStatement menuStmt = null;
+        PreparedStatement tableStmt = null;
+        ResultSet generatedKeys = null;
+
+        try {
+            DBConnect();
+            conn = connection;
+            conn.setAutoCommit(false);
+
+            String venueQuery = "INSERT INTO objekat (Vlasnik_id, naziv, cijena_rezervacije, grad, adresa, broj_mjesta, broj_stolova, datumi, zarada, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            venueStmt = conn.prepareStatement(venueQuery, Statement.RETURN_GENERATED_KEYS);
+            venueStmt.setInt(1, venue.getOwnerId());
+            venueStmt.setString(2, venue.getName());
+            venueStmt.setDouble(3, venue.getReservationPrice());
+            venueStmt.setString(4, venue.getPlace());
+            venueStmt.setString(5, venue.getAddress());
+            venueStmt.setInt(6, venue.getCapacity());
+            venueStmt.setInt(7, venue.getBrojStolova());
+            venueStmt.setString(8, venue.getDatumi());
+            venueStmt.setDouble(9, venue.getZarada());
+            venueStmt.setString(10, "NA ČEKANJU");
+            venueStmt.executeUpdate();
+
+            generatedKeys = venueStmt.getGeneratedKeys();
+            int venueId;
+            if (generatedKeys.next()) {
+                venueId = generatedKeys.getInt(1);
+                venue.setId(venueId);
+            } else {
+                throw new SQLException("Failed to retrieve venue ID.");
+            }
+
+            String menuQuery = "INSERT INTO meni (opis, cijena_po_osobi, Objekat_id) VALUES (?, ?, ?)";
+            menuStmt = conn.prepareStatement(menuQuery);
+            for (Menu menu : menus) {
+                menuStmt.setString(1, menu.getDescription());
+                menuStmt.setDouble(2, menu.getPrice());
+                menuStmt.setInt(3, venueId);
+                menuStmt.executeUpdate();
+            }
+
+            String tableQuery = "INSERT INTO sto (broj_mjesta, Objekat_id) VALUES (?, ?)";
+            tableStmt = conn.prepareStatement(tableQuery);
+            tableStmt.setInt(1, seatsPerTable);
+            tableStmt.setInt(2, venueId);
+            tableStmt.executeUpdate();
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    //
+                }
+            }
+            throw e;
+        } finally {
+            if (generatedKeys != null) generatedKeys.close();
+            if (venueStmt != null) venueStmt.close();
+            if (menuStmt != null) menuStmt.close();
+            if (tableStmt != null) tableStmt.close();
+            if (conn != null) conn.close();
+        }
+    }
 
 
     public static <T> List<T> retrieveDataFromTable(String tableName, Class<T> clazz){
