@@ -66,13 +66,16 @@ public class OwnerNewVenue {
 
         List<Menu> menus = parseMenus(menuInput);
         if (menus.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Please provide at least one valid menu (format: description,price).");
+            showAlert(Alert.AlertType.ERROR, "Error", "Please provide at least one valid menu (format: description: price).");
             return;
         }
 
         try {
             Venue newVenue = new Venue(0, name, address, place, maxSeatsInt, priceDouble, currentVlasnikId, "NA ČEKANJU", tablesInt, null, 0.0);
             Database.addVenue(newVenue, tablesInt, seatsPerTableInt, menus);
+
+            Database.venues = Database.retrieveDataFromTable("objekat", Venue.class);
+            Database.menus = Database.retrieveDataFromTable("meni", Menu.class);
 
             showAlert(Alert.AlertType.INFORMATION, "Success", "Venue added successfully!");
             venueName.clear();
@@ -120,7 +123,7 @@ public class OwnerNewVenue {
                         menus.add(new Menu(0, description, price));
                     }
                 } catch (NumberFormatException e) {
-                    System.out.println("Error! Wrong input" + e.getMessage());
+                    System.out.println("Error! Wrong input: " + e.getMessage());
                 }
             }
         }

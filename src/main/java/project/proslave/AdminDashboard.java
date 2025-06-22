@@ -87,4 +87,10 @@ public class AdminDashboard {
         stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("login.fxml"))));
         stage.show();
     }
+
+    public void venueRequests(ActionEvent event) throws IOException {
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("admin_venueList.fxml"))));
+        stage.show();
+    }
 }

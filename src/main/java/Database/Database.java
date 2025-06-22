@@ -244,8 +244,27 @@ public class Database {
         }
     }
 
+    public static void updateVenueStatus(int venueId, String status) throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try {
+            DBConnect();
+            conn = connection;
+            String query = "UPDATE objekat SET status = ? WHERE id = ?";
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, status);
+            stmt.setInt(2, venueId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            if (stmt != null) stmt.close();
+            if (conn != null) conn.close();
+        }
+    }
 
-    public static <T> List<T> retrieveDataFromTable(String tableName, Class<T> clazz){
+
+    /*public static <T> List<T> retrieveDataFromTable(String tableName, Class<T> clazz){
         List<T> list =new ArrayList<>();
 
         try{
@@ -273,6 +292,64 @@ public class Database {
                 list.add(obj);
             }
         }catch (Exception e){
+            e.printStackTrace();
+        }
+        return list;
+    }*/
+
+    public static <T> List<T> retrieveDataFromTable(String tableName, Class<T> clazz) {
+        List<T> list = new ArrayList<>();
+
+        try {
+            DBConnect();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName);
+
+            Field[] fields = clazz.getDeclaredFields();
+
+            while (resultSet.next()) {
+                T obj = clazz.getDeclaredConstructor().newInstance();
+
+                for (Field field : fields) {
+                    field.setAccessible(true);
+                    String columnName = field.getName();
+                    if (tableName.equals("objekat")) {
+                        if (columnName.equals("ownerId")) columnName = "Vlasnik_id";
+                        else if (columnName.equals("name")) columnName = "naziv";
+                        else if (columnName.equals("reservationPrice")) columnName = "cijena_rezervacije";
+                        else if (columnName.equals("place")) columnName = "grad";
+                        else if (columnName.equals("capacity")) columnName = "broj_mjesta";
+                        else if (columnName.equals("brojStolova")) columnName = "broj_stolova";
+                    } else if (tableName.equals("sto")) {
+                        if (columnName.equals("capacity")) columnName = "broj_mjesta";
+                        else if (columnName.equals("objekatId")) columnName = "Objekat_id";
+                    } else if (tableName.equals("meni")) {
+                        if (columnName.equals("description")) columnName = "opis";
+                        else if (columnName.equals("price")) columnName = "cijena_po_osobi";
+                        else if (columnName.equals("objekatId")) columnName = "Objekat_id";
+                    }
+                    try {
+                        if (field.getType() == int.class) {
+                            field.setInt(obj, resultSet.getInt(columnName));
+                        } else if (field.getType() == String.class) {
+                            String value = resultSet.getString(columnName);
+                            field.set(obj, value != null ? value : "");
+                        } else if (field.getType() == Date.class) {
+                            field.set(obj, resultSet.getDate(columnName));
+                        } else if (field.getType() == BigDecimal.class) {
+                            field.set(obj, resultSet.getBigDecimal(columnName));
+                        } else if (field.getType() == double.class) {
+                            field.setDouble(obj, resultSet.getDouble(columnName));
+                        }
+                    } catch (SQLException e) {
+                        continue;
+                    }
+                }
+                list.add(obj);
+            }
+            statement.close();
+            connection.close();
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return list;

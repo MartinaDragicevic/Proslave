@@ -82,7 +82,7 @@
                   <Font size="20.0" />
                </font>
             </Label>
-            <Button layoutX="64.0" layoutY="134.0" mnemonicParsing="false" prefHeight="33.0" prefWidth="73.0" style="-fx-background-color: black;" stylesheets="@../../css/css_file.css" text="View" textFill="WHITE">
+            <Button layoutX="64.0" layoutY="134.0" mnemonicParsing="false" onAction="#venueRequests" prefHeight="33.0" prefWidth="73.0" style="-fx-background-color: black;" stylesheets="@../../css/css_file.css" text="View" textFill="WHITE">
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor>
