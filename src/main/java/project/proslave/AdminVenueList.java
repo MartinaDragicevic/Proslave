@@ -31,13 +31,11 @@ public class AdminVenueList implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         refreshVenueTextArea();
 
-        // Set cursor to pointer and default style
         venueTextArea.setCursor(Cursor.HAND);
         venueTextArea.setStyle("-fx-text-fill: black;");
 
         venueTextArea.setOnMouseClicked(this::handleVenueSelection);
 
-        // Bind button actions
         acceptButton.setOnAction(event -> handleAccept());
         declineButton.setOnAction(event -> handleDecline());
     }
@@ -66,12 +64,6 @@ public class AdminVenueList implements Initializable {
 
         int caretPosition = venueTextArea.getCaretPosition();
         String text = venueTextArea.getText();
-        if (text == null || text.isEmpty() || text.equals("Nema dostupnih objekata.")) {
-            showAlert(Alert.AlertType.ERROR, "Greška", "Nema dostupnih objekata.");
-            venueTextArea.deselect();
-            selectedVenueId = -1;
-            return;
-        }
 
         String[] lines = text.split("\n");
         int currentPos = 0;
@@ -86,13 +78,6 @@ public class AdminVenueList implements Initializable {
                 break;
             }
             currentPos = lineEnd;
-        }
-
-        if (selectedLine == null || selectedLine.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Greška", "Kliknite na validan objekat.");
-            venueTextArea.deselect();
-            selectedVenueId = -1;
-            return;
         }
 
         try {
@@ -117,17 +102,12 @@ public class AdminVenueList implements Initializable {
     }
 
     private void handleAccept() {
-        if (selectedVenueId == -1) {
-            showAlert(Alert.AlertType.INFORMATION, "Informacija", "Selektujte objekat.");
-            return;
-        }
-
         try {
             Database.updateVenueStatus(selectedVenueId, "ODOBREN");
-            Database.venues = Database.retrieveDataFromTable("objekat", Venue.class); // Refresh venues list
+            Database.venues = Database.retrieveDataFromTable("objekat", Venue.class);
             refreshVenueTextArea();
             showAlert(Alert.AlertType.INFORMATION, "Uspjeh", "Objekat odobren.");
-            selectedVenueId = -1; // Reset selection
+            selectedVenueId = -1;
             venueTextArea.deselect();
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Greška", "Greška pri odobravanju objekta: " + e.getMessage());
@@ -135,17 +115,12 @@ public class AdminVenueList implements Initializable {
     }
 
     private void handleDecline() {
-        if (selectedVenueId == -1) {
-            showAlert(Alert.AlertType.INFORMATION, "Informacija", "Selektujte objekat.");
-            return;
-        }
-
         try {
             Database.updateVenueStatus(selectedVenueId, "ODBIJEN");
-            Database.venues = Database.retrieveDataFromTable("objekat", Venue.class); // Refresh venues list
+            Database.venues = Database.retrieveDataFromTable("objekat", Venue.class);
             refreshVenueTextArea();
             showAlert(Alert.AlertType.INFORMATION, "Uspjeh", "Objekat odbijen.");
-            selectedVenueId = -1; // Reset selection
+            selectedVenueId = -1;
             venueTextArea.deselect();
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Greška", "Greška pri odbijanju objekta: " + e.getMessage());
