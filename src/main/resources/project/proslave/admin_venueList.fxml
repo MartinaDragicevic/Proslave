@@ -18,7 +18,7 @@
                 <Font name="Berlin Sans FB" size="14.0" />
             </font>
         </Label>
-        <Text layoutX="551.0" layoutY="49.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Venue List">
+        <Text layoutX="538.0" layoutY="49.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Venue List">
             <font>
                 <Font name="Berlin Sans FB" size="23.0" />
             </font>
@@ -35,5 +35,15 @@
       </Button>
       <TextArea fx:id="venueTextArea" layoutX="53.0" layoutY="105.0" prefHeight="426.0" prefWidth="523.0" />
       <TextArea fx:id="menuTextArea" layoutX="600.0" layoutY="105.0" prefHeight="426.0" prefWidth="523.0" />
+      <Text layoutX="812.0" layoutY="90.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Venue Menu">
+         <font>
+            <Font name="Berlin Sans FB" size="23.0" />
+         </font>
+      </Text>
+      <Text layoutX="221.0" layoutY="90.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Venue Informations">
+         <font>
+            <Font name="Berlin Sans FB" size="23.0" />
+         </font>
+      </Text>
     </children>
 </AnchorPane>

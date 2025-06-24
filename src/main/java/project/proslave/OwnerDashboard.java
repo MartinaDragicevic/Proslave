@@ -95,4 +95,9 @@ public class OwnerDashboard {
         stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("owner_newVenue.fxml"))));
         stage.show();
     }
+    public void venueList(ActionEvent event) throws IOException {
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("owner_venueList.fxml"))));
+        stage.show();
+    }
 }

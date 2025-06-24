@@ -263,40 +263,6 @@ public class Database {
         }
     }
 
-
-    /*public static <T> List<T> retrieveDataFromTable(String tableName, Class<T> clazz){
-        List<T> list =new ArrayList<>();
-
-        try{
-            DBConnect();
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName);
-
-            Field[] fields = clazz.getDeclaredFields();
-
-            while (resultSet.next()){
-                T obj = clazz.getDeclaredConstructor(). newInstance();
-
-                for (Field field : fields) {
-                    field.setAccessible(true);
-                    if (field.getType() == int.class) {
-                        field.setInt(obj, resultSet.getInt(field.getName()));
-                    } else if (field.getType() == String.class) {
-                        field.set(obj, resultSet.getString(field.getName()));
-                    } else if (field.getType() == Date.class) {
-                        field.set(obj, resultSet.getDate(field.getName()));
-                    } else if (field.getType() == BigDecimal.class) {
-                        field.set(obj, resultSet.getBigDecimal(field.getName()));
-                    }
-                }
-                list.add(obj);
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return list;
-    }*/
-
     public static <T> List<T> retrieveDataFromTable(String tableName, Class<T> clazz) {
         List<T> list = new ArrayList<>();
 
@@ -318,6 +284,7 @@ public class Database {
                         else if (columnName.equals("name")) columnName = "naziv";
                         else if (columnName.equals("reservationPrice")) columnName = "cijena_rezervacije";
                         else if (columnName.equals("place")) columnName = "grad";
+                        else if (columnName.equals("adress")) columnName = "adresa";
                         else if (columnName.equals("capacity")) columnName = "broj_mjesta";
                         else if (columnName.equals("brojStolova")) columnName = "broj_stolova";
                     } else if (tableName.equals("sto")) {

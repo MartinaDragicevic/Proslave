@@ -6,25 +6,22 @@ import SistemZaPlaniranjeProslava.Venue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
-import javafx.scene.Cursor;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class AdminVenueList implements Initializable {
-    @FXML private TextArea menuTextArea;
+public class OwnerVenueList implements Initializable {
     @FXML private TextArea venueTextArea;
-    @FXML private Button acceptButton;
-    @FXML private Button declineButton;
     private int selectedVenueId = -1;
 
     @Override
@@ -35,9 +32,6 @@ public class AdminVenueList implements Initializable {
         venueTextArea.setStyle("-fx-text-fill: black;");
 
         venueTextArea.setOnMouseClicked(this::handleVenueSelection);
-
-        acceptButton.setOnAction(event -> handleAccept());
-        declineButton.setOnAction(event -> handleDecline());
     }
 
     private void refreshVenueTextArea() {
@@ -91,39 +85,12 @@ public class AdminVenueList implements Initializable {
                             .append(menu.getPrice()).append("\n");
                 }
             }
-            menuTextArea.setText(menusText.length() > 0 ? menusText.toString() : "Nema menija za ovaj objekat.");
 
             venueTextArea.selectRange(lineStart, lineEnd - 1);
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             showAlert(Alert.AlertType.ERROR, "Greška", "Greška pri odabiru objekta. Kliknite na validan red.");
             venueTextArea.deselect();
             selectedVenueId = -1;
-        }
-    }
-
-    private void handleAccept() {
-        try {
-            Database.updateVenueStatus(selectedVenueId, "ODOBREN");
-            Database.venues = Database.retrieveDataFromTable("objekat", Venue.class);
-            refreshVenueTextArea();
-            showAlert(Alert.AlertType.INFORMATION, "Uspjeh", "Objekat odobren.");
-            selectedVenueId = -1;
-            venueTextArea.deselect();
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Greška", "Greška pri odobravanju objekta: " + e.getMessage());
-        }
-    }
-
-    private void handleDecline() {
-        try {
-            Database.updateVenueStatus(selectedVenueId, "ODBIJEN");
-            Database.venues = Database.retrieveDataFromTable("objekat", Venue.class);
-            refreshVenueTextArea();
-            showAlert(Alert.AlertType.INFORMATION, "Uspjeh", "Objekat odbijen.");
-            selectedVenueId = -1;
-            venueTextArea.deselect();
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Greška", "Greška pri odbijanju objekta: " + e.getMessage());
         }
     }
 
@@ -137,7 +104,7 @@ public class AdminVenueList implements Initializable {
 
     public void backToDashboard(MouseEvent event) throws IOException {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("admin_dashboard.fxml"))));
+        stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("owner_dashboard.fxml"))));
         stage.show();
     }
 }
