@@ -263,6 +263,49 @@ public class Database {
         }
     }
 
+    public static void upisiInformacijeUBazu(int objekatId, String text) {
+        String query = "INSERT INTO obavjestenje (Objekat_id, tekst) VALUES (?, ?)";
+
+        try {
+            DBConnect();
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setInt(1, objekatId);
+            stmt.setString(2, text);
+            stmt.executeUpdate();
+
+            stmt.close();
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void loadNotifications() {
+        notifications.clear();
+        String query = "SELECT * FROM obavjestenje";
+
+        try {
+            DBConnect();
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                int objekatId = rs.getInt("Objekat_id");
+                String tekst = rs.getString("tekst");
+
+                notifications.add(new Notification(id, objekatId, tekst));
+            }
+
+            rs.close();
+            stmt.close();
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public static <T> List<T> retrieveDataFromTable(String tableName, Class<T> clazz) {
         List<T> list = new ArrayList<>();
 

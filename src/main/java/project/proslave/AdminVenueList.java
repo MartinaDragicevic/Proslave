@@ -8,11 +8,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.Cursor;
 
@@ -46,15 +45,19 @@ public class AdminVenueList implements Initializable {
             venuesText.append("Nema dostupnih objekata.");
         } else {
             for (Venue venue : Database.venues) {
-                venuesText.append("ID: ").append(venue.getId())
-                        .append(", Naziv: ").append(venue.getName())
-                        .append(", Grad: ").append(venue.getPlace())
-                        .append(", Adresa: ").append(venue.getAddress())
-                        .append(", Status: ").append(venue.getStatus())
-                        .append("\n");
+
+                if (venue.getStatus().equals("NA CEKANJU")){
+                    venuesText.append("ID: ").append(venue.getId())
+                            .append(", Naziv: ").append(venue.getName())
+                            .append(", Grad: ").append(venue.getPlace())
+                            .append(", Adresa: ").append(venue.getAddress())
+                            .append(", Status: ").append(venue.getStatus())
+                            .append("\n");
+                }
             }
         }
         venueTextArea.setText(venuesText.toString());
+        menuTextArea.clear();
     }
 
     private void handleVenueSelection(MouseEvent event) {
@@ -115,25 +118,62 @@ public class AdminVenueList implements Initializable {
     }
 
     private void handleDecline() {
-        try {
-            Database.updateVenueStatus(selectedVenueId, "ODBIJEN");
-            Database.venues = Database.retrieveDataFromTable("objekat", Venue.class);
-            refreshVenueTextArea();
-            showAlert(Alert.AlertType.INFORMATION, "Uspjeh", "Objekat odbijen.");
-            selectedVenueId = -1;
-            venueTextArea.deselect();
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Greška", "Greška pri odbijanju objekta: " + e.getMessage());
+        if (selectedVenueId == -1) {
+            showAlert(Alert.AlertType.WARNING, "Upozorenje", "Nijedan objekat nije odabran.");
+            return;
         }
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Odbijanje objekta");
+        alert.setHeaderText(null);
+
+        CheckBox cb1 = new CheckBox("Maksimalan broj mijesta u salonu se ne podudara sa brojem mijesta koji se dobijaju kada se svi stolovi popune,");
+        CheckBox cb2 = new CheckBox("Cijene menija nisu usklađene sa cijenama u ostalim objektima");
+
+        cb1.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) cb2.setSelected(false);
+        });
+        cb2.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) cb1.setSelected(false);
+        });
+
+        VBox content = new VBox(10, new Label("Unesi razlog odbijanja:"), cb1, cb2);
+        alert.getDialogPane().setContent(content);
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                String selectedReason = null;
+                if (cb1.isSelected()) selectedReason = cb1.getText();
+                else if (cb2.isSelected()) selectedReason = cb2.getText();
+
+                if (selectedReason != null) {
+                    try {
+                        Database.updateVenueStatus(selectedVenueId, "ODBIJEN");
+                        Database.upisiInformacijeUBazu(selectedVenueId, selectedReason);
+                        Database.venues = Database.retrieveDataFromTable("objekat", Venue.class);
+                        refreshVenueTextArea();
+                        showAlert(Alert.AlertType.INFORMATION, "Uspjeh", "Objekat odbijen.");
+                        selectedVenueId = -1;
+                        venueTextArea.deselect();
+                    } catch (Exception e) {
+                        showAlert(Alert.AlertType.ERROR, "Greška", "Greška pri odbijanju objekta: " + e.getMessage());
+                    }
+                } else {
+                    showAlert(Alert.AlertType.WARNING, "Upozorenje", "Morate izabrati razlog odbijanja.");
+                }
+            }
+        });
     }
 
+
     private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+            Alert alert = new Alert(type);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
     }
+
 
     public void backToDashboard(MouseEvent event) throws IOException {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();

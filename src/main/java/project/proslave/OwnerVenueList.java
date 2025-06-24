@@ -2,6 +2,7 @@ package project.proslave;
 
 import Database.Database;
 import SistemZaPlaniranjeProslava.Menu;
+import SistemZaPlaniranjeProslava.Notification;
 import SistemZaPlaniranjeProslava.Venue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -26,6 +27,7 @@ public class OwnerVenueList implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        Database.loadNotifications();
         refreshVenueTextArea();
 
         venueTextArea.setCursor(Cursor.HAND);
@@ -44,12 +46,22 @@ public class OwnerVenueList implements Initializable {
                         .append(", Naziv: ").append(venue.getName())
                         .append(", Grad: ").append(venue.getPlace())
                         .append(", Adresa: ").append(venue.getAddress())
-                        .append(", Status: ").append(venue.getStatus())
-                        .append("\n");
+                        .append(", Status: ").append(venue.getStatus());
+
+                if (venue.getStatus().equals("ODBIJEN")) {
+                    for (Notification notification : Database.notifications) {
+                        if (notification.getObjekatId() == venue.getId()) {
+                            venuesText.append(", Razlog: ").append(notification.getText());
+                        }
+                    }
+                }
+
+                venuesText.append("\n");
             }
         }
         venueTextArea.setText(venuesText.toString());
     }
+
 
     private void handleVenueSelection(MouseEvent event) {
         if (event.getClickCount() != 1 || event.getButton() != MouseButton.PRIMARY) {
