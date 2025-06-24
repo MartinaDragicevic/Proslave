@@ -38,21 +38,6 @@
                   <String fx:value="black_button" />
                </styleClass>
             </Button>
-            <Button layoutX="44.0" layoutY="290.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="134.0" style="-fx-background-color: black; -fx-border-color: white;" stylesheets="@../../css/css_file.css" text="Bookings">
-               <cursor>
-                  <Cursor fx:constant="HAND" />
-               </cursor>
-               <font>
-                  <Font name="Times New Roman" size="16.0" />
-               </font>
-               <effect>
-                  <DropShadow />
-               </effect>
-               <styleClass>
-                  <String fx:value="round" />
-                  <String fx:value="black_button" />
-               </styleClass>
-            </Button>
             <Button layoutX="47.0" layoutY="609.0" mnemonicParsing="false" onAction="#logout" prefHeight="26.0" prefWidth="134.0" style="-fx-background-color: red; -fx-border-color: black;" stylesheets="@../../css/css_file.css" text="Log Out">
                <cursor>
                   <Cursor fx:constant="HAND" />
@@ -80,40 +65,19 @@
             <InnerShadow height="45.5" radius="35.875" width="100.0" />
          </effect>
       </AnchorPane>
-      <Label layoutX="479.0" layoutY="192.0" text="Welcome to our Agency page!">
+      <Label layoutX="610.0" layoutY="133.0" text="Welcome back!">
          <font>
             <Font size="35.0" />
          </font>
       </Label>
-      <Pane layoutX="728.0" layoutY="284.0" prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: purple;" styleClass="round">
+      <Pane layoutX="610.0" layoutY="266.0" prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: purple;" styleClass="round">
          <children>
-            <Label layoutX="25.0" layoutY="43.0" text="Few-Day Journes">
+            <Label layoutX="31.0" layoutY="43.0" text="See Venues List">
                <font>
                   <Font size="20.0" />
                </font>
             </Label>
-            <Button layoutX="52.0" layoutY="137.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="94.0" style="-fx-background-color: black;" stylesheets="@../../css/css_file.css" text="Click Here" textFill="WHITE">
-               <cursor>
-                  <Cursor fx:constant="HAND" />
-               </cursor>
-               <styleClass>
-                  <String fx:value="round_click" />
-                  <String fx:value="glowing_button" />
-               </styleClass>
-               <effect>
-                  <Reflection topOpacity="0.25" />
-               </effect>
-            </Button>
-         </children>
-      </Pane>
-      <Pane layoutX="487.0" layoutY="284.0" prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: purple;" styleClass="round">
-         <children>
-            <Label layoutX="23.0" layoutY="43.0" text="One-Day Journes">
-               <font>
-                  <Font size="20.0" />
-               </font>
-            </Label>
-            <Button layoutX="53.0" layoutY="138.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="94.0" style="-fx-background-color: black;" stylesheets="@../../css/css_file.css" text="Click Here" textFill="WHITE">
+            <Button layoutX="53.0" layoutY="120.0" mnemonicParsing="false" onAction="#venueList" prefHeight="30.0" prefWidth="94.0" style="-fx-background-color: black;" stylesheets="@../../css/css_file.css" text="Click Here" textFill="WHITE">
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor>

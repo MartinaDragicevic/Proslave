@@ -263,7 +263,7 @@ public class Database {
         }
     }
 
-    public static void upisiInformacijeUBazu(int objekatId, String text) {
+    public static void addDeclineTextNotification(int objekatId, String text) {
         String query = "INSERT INTO obavjestenje (Objekat_id, tekst) VALUES (?, ?)";
 
         try {
@@ -327,7 +327,7 @@ public class Database {
                         else if (columnName.equals("name")) columnName = "naziv";
                         else if (columnName.equals("reservationPrice")) columnName = "cijena_rezervacije";
                         else if (columnName.equals("place")) columnName = "grad";
-                        else if (columnName.equals("adress")) columnName = "adresa";
+                        else if (columnName.equals("address")) columnName = "adresa";
                         else if (columnName.equals("capacity")) columnName = "broj_mjesta";
                         else if (columnName.equals("brojStolova")) columnName = "broj_stolova";
                     } else if (tableName.equals("sto")) {

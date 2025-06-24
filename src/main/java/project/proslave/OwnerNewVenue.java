@@ -71,7 +71,7 @@ public class OwnerNewVenue {
         }
 
         try {
-            Venue newVenue = new Venue(0, name, address, place, maxSeatsInt, priceDouble, currentVlasnikId, "NA ČEKANJU", tablesInt, null, 0.0);
+            Venue newVenue = new Venue(0, currentVlasnikId, name, priceDouble, place, address, maxSeatsInt, tablesInt, null, 0.0, "NA ČEKANJU");
             Database.addVenue(newVenue, tablesInt, seatsPerTableInt, menus);
 
             Database.venues = Database.retrieveDataFromTable("objekat", Venue.class);

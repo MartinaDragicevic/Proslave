@@ -149,7 +149,7 @@ public class AdminVenueList implements Initializable {
                 if (selectedReason != null) {
                     try {
                         Database.updateVenueStatus(selectedVenueId, "ODBIJEN");
-                        Database.upisiInformacijeUBazu(selectedVenueId, selectedReason);
+                        Database.addDeclineTextNotification(selectedVenueId, selectedReason);
                         Database.venues = Database.retrieveDataFromTable("objekat", Venue.class);
                         refreshVenueTextArea();
                         showAlert(Alert.AlertType.INFORMATION, "Uspjeh", "Objekat odbijen.");

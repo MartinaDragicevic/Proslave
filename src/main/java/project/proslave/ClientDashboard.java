@@ -27,14 +27,6 @@ public class ClientDashboard {
     @FXML private Label username;
     @FXML private Label accountBalance;
 
-    /**
-     *
-     * Get the currently logged-in client's username from the database, and use it for verification the password before updating.
-     *
-     * Display information (name, last name and username) for currently logged-in client.
-     *
-     **/
-
     public void initialize() {
         String loggedInUser = Login.getClientUsername();
         if (loggedInUser != null) {
@@ -90,6 +82,11 @@ public class ClientDashboard {
     public void logout(ActionEvent event) throws IOException {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("login.fxml"))));
+        stage.show();
+    }
+    public void venueList(ActionEvent event) throws IOException {
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("client_venueList.fxml"))));
         stage.show();
     }
 }

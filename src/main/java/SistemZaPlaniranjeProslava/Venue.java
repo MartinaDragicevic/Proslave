@@ -15,7 +15,7 @@ public class Venue {
 
     public Venue() {}
 
-    public Venue(int id, String name, String address, String place, int capacity, double reservationPrice, int ownerId, String status, int brojStolova, String datumi, double zarada) {
+    public Venue(int id, int ownerId, String name, double reservationPrice, String place, String address, int capacity, int brojStolova, String datumi, double zarada, String status) {
         this.id = id;
         this.name = name;
         this.address = address;
