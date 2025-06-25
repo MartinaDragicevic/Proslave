@@ -77,7 +77,7 @@
       </Label>
       <Pane layoutX="619.0" layoutY="277.0" prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: black;" styleClass="round" stylesheets="@../../css/css_file.css">
          <children>
-            <Label layoutX="64.0" layoutY="23.0" text="Padding" textFill="#f80d0d">
+            <Label layoutX="64.0" layoutY="23.0" text="Pending" textFill="#f80d0d">
                <font>
                   <Font size="20.0" />
                </font>

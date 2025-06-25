@@ -20,7 +20,7 @@
                 <Font name="Berlin Sans FB" size="14.0" />
             </font>
         </Label>
-        <Text layoutX="470.0" layoutY="49.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Venues and CelebrationList">
+        <Text layoutX="547.0" layoutY="49.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Venues List">
             <font>
                 <Font name="Berlin Sans FB" size="23.0" />
             </font>
@@ -30,7 +30,10 @@
             <Font name="Berlin Sans FB" size="25.0" />
          </font>
       </Text>
-      <TextArea fx:id="venueTextArea" layoutX="53.0" layoutY="112.0" prefHeight="502.0" prefWidth="510.0" />
+      <TextArea fx:id="venueTextArea" layoutX="53.0" layoutY="112.0" prefHeight="502.0" prefWidth="510.0">
+         <font>
+            <Font size="18.0" />
+         </font></TextArea>
       <Button layoutX="766.0" layoutY="369.0" mnemonicParsing="false" onAction="#searchFilters" style="-fx-background-color: green; -fx-text-fill: white;" text="Search Venues">
          <font>
             <Font size="18.0" />

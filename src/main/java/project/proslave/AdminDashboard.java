@@ -25,14 +25,6 @@ public class AdminDashboard {
     @FXML private Label fullName;
     @FXML private Label username;
 
-    /**
-     *
-     * Get the currently logged-in admin's username from the database, and use it for verification the password before updating.
-     *
-     * Display information (name, last name and username) for currently logged-in admin.
-     *
-     **/
-
     public void initialize() {
         String loggedInUser = Login.getAdminUsername();
         if (loggedInUser != null) {

@@ -25,14 +25,6 @@ public class OwnerDashboard {
     @FXML private Label username;
     @FXML private Label accountBalance;
 
-    /**
-     *
-     * Get the currently logged-in owner's username from the database, and use it for verification the password before updating.
-     *
-     * Display information (name, last name and username) for currently logged-in owner.
-     *
-     **/
-
     public void initialize() {
         String loggedInUser = Login.getOwnerUsername();
         if (loggedInUser != null) {

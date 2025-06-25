@@ -82,7 +82,7 @@
                   <Font name="Berlin Sans FB" size="17.0" />
                </font>
             </Text>
-            <Text fill="WHITE" layoutX="581.0" layoutY="200.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Number of the Tables in Venue">
+            <Text fill="WHITE" layoutX="581.0" layoutY="200.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Number of Tables in Venue">
                <font>
                   <Font name="Berlin Sans FB" size="17.0" />
                </font>

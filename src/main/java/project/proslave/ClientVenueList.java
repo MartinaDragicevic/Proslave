@@ -26,12 +26,12 @@ public class ClientVenueList implements Initializable {
     @FXML private TextField cityFilter;
     @FXML private DatePicker dateFilter;
     @FXML private TextField seatsFilter;
-    private int selectedVenueId = -1;
+    public static int selectedVenueId = -1;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Database.loadNotifications();
         refreshVenueTextArea();
+        venueTextArea.setOnMouseClicked(this::handleVenueSelection);
     }
 
     private void refreshVenueTextArea() {
@@ -52,7 +52,6 @@ public class ClientVenueList implements Initializable {
                 venuesText.append("ID: ").append(venue.getId())
                         .append(", Naziv: ").append(venue.getName())
                         .append(", Grad: ").append(venue.getPlace())
-                        .append(", Adresa: ").append(venue.getAddress())
                         .append("\n");
             }
         }
@@ -72,7 +71,7 @@ public class ClientVenueList implements Initializable {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Greška");
                 alert.setHeaderText(null);
-                alert.setContentText("Broj mesta mora biti ceo broj.");
+                alert.setContentText("Broj mjesta mora biti cijeli broj.");
                 alert.showAndWait();
                 return;
             }
@@ -100,9 +99,7 @@ public class ClientVenueList implements Initializable {
                 venuesText.append("ID: ").append(venue.getId())
                         .append(", Naziv: ").append(venue.getName())
                         .append(", Grad: ").append(venue.getPlace())
-                        .append(", Adresa: ").append(venue.getAddress())
                         .append(", Kapacitet: ").append(venue.getCapacity())
-                        .append(", Dostupni datumi: ").append(venue.getDatumi())
                         .append("\n");
                 anyMatch = true;
             }
@@ -113,6 +110,26 @@ public class ClientVenueList implements Initializable {
         }
 
         venueTextArea.setText(venuesText.toString());
+    }
+
+    private void handleVenueSelection(MouseEvent event) {
+        String selectedText = venueTextArea.getSelectedText();
+
+        if (selectedText != null && selectedText.contains("ID:")) {
+            try {
+                int idStart = selectedText.indexOf("ID:") + 4;
+                int idEnd = selectedText.indexOf(",", idStart);
+                selectedVenueId = Integer.parseInt(selectedText.substring(idStart, idEnd));
+
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("client_celebrationReservation.fxml"));
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setScene(new Scene(loader.load()));
+                stage.show();
+            } catch (Exception e) {
+                System.out.println("Greška pri parsiranju ID-a.");
+            }
+        }
+
     }
 
     public void deleteFilters() {
