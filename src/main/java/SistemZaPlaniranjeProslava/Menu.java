@@ -2,38 +2,31 @@ package SistemZaPlaniranjeProslava;
 
 public class Menu {
     private int id;
-    private String description;
-    private double price;
-    private int objekatId;
+    private Venue objekat;
+    private String opis;
+    private double cijena_po_osobi;
 
     public Menu() {}
 
-    public Menu(int id, String description, double price) {
+    public Menu(int id, Venue objekat, String opis, double cijena_po_osobi) {
         this.id = id;
-        this.description = description;
-        this.price = price;
-        this.objekatId = 0;
-    }
-
-    public Menu(int id, String description, double price, int objekatId) {
-        this.id = id;
-        this.description = description;
-        this.price = price;
-        this.objekatId = objekatId;
+        this.objekat = objekat;
+        this.opis = opis;
+        this.cijena_po_osobi = cijena_po_osobi;
     }
 
     public int getId() { return id; }
-    public String getDescription() { return description; }
-    public double getPrice() { return price; }
-    public int getObjekatId() { return objekatId; }
+    public Venue getObjekat() { return objekat; }
+    public String getOpis() { return opis; }
+    public double getCijenaPoOsobi() { return cijena_po_osobi; }
 
     public void setId(int id) { this.id = id; }
-    public void setDescription(String description) { this.description = description; }
-    public void setPrice(double price) { this.price = price; }
-    public void setObjekatId(int objekatId) { this.objekatId = objekatId; }
+    public void setObjekat(Venue objekat) { this.objekat = objekat; }
+    public void setOpis(String opis) { this.opis = opis; }
+    public void setCijenaPoOsobi(double cijena_po_osobi) { this.cijena_po_osobi = cijena_po_osobi; }
 
     @Override
     public String toString() {
-        return "Menu [id=" + id + ", description=" + description + ", price=" + price + ", objekatId=" + objekatId + "]";
+        return "Menu [id=" + id + ", objekat=" + objekat + ", opis=" + opis + ", cijena_po_osobi=" + cijena_po_osobi + "]";
     }
 }

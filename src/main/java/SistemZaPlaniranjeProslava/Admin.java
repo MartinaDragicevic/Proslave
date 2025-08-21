@@ -2,7 +2,10 @@ package SistemZaPlaniranjeProslava;
 
 public class Admin {
     private int id;
-    private String ime, prezime, korisnicko_ime, lozinka;
+    private String ime;
+    private String prezime;
+    private String korisnicko_ime;
+    private String lozinka;
 
     public Admin() {}
 
@@ -28,6 +31,6 @@ public class Admin {
 
     @Override
     public String toString() {
-        return "Admin [id=" + id + ", ime=" + ime + ", prezime=" + prezime + ", korisnicko ime=" + korisnicko_ime + ", lozinka=" + lozinka + "]";
+        return "Admin [id=" + id + ", ime=" + ime + ", prezime=" + prezime + ", korisnicko_ime=" + korisnicko_ime + ", lozinka=" + lozinka + "]";
     }
 }

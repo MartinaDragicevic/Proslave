@@ -43,15 +43,15 @@ public class ClientVenueList implements Initializable {
                 sortedVenues.add(venue);
             }
         }
-        sortedVenues.sort(Comparator.comparing(Venue::getName, String.CASE_INSENSITIVE_ORDER));
+        sortedVenues.sort(Comparator.comparing(Venue::getNaziv, String.CASE_INSENSITIVE_ORDER));
 
         if (sortedVenues.isEmpty()) {
-            venuesText.append("Nema dostupnih objekata.");
+            venuesText.append("No available venues.");
         } else {
             for (Venue venue : sortedVenues) {
                 venuesText.append("ID: ").append(venue.getId())
-                        .append(", Naziv: ").append(venue.getName())
-                        .append(", Grad: ").append(venue.getPlace())
+                        .append(", Name: ").append(venue.getNaziv())
+                        .append(", City: ").append(venue.getGrad())
                         .append("\n");
             }
         }
@@ -69,9 +69,9 @@ public class ClientVenueList implements Initializable {
                 seats = Integer.parseInt(seatsText);
             } catch (NumberFormatException e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Greška");
+                alert.setTitle("Error");
                 alert.setHeaderText(null);
-                alert.setContentText("Broj mjesta mora biti cijeli broj.");
+                alert.setContentText("Number of seats must be digit.");
                 alert.showAndWait();
                 return;
             }
@@ -84,29 +84,26 @@ public class ClientVenueList implements Initializable {
             if (!venue.getStatus().equals("ODOBREN"))
                 continue;
 
-            boolean cityMatch = city.isEmpty() || venue.getPlace().toLowerCase().contains(city);
-            boolean seatsMatch = (seats == -1) || (venue.getCapacity() >= seats);
+            boolean cityMatch = city.isEmpty() || venue.getGrad().toLowerCase().contains(city);
+            boolean seatsMatch = (seats == -1) || (venue.getBrojMjesta() >= seats);
 
             boolean dateMatch = true;
             if (date != null) {
-                String venueDates = venue.getDatumi();
-                if (venueDates == null || !venueDates.contains(date.toString())) {
-                    dateMatch = false;
-                }
+                dateMatch = venue.getDatumi() != null && venue.getDatumi().contains(date);
             }
 
             if (cityMatch && seatsMatch && dateMatch) {
                 venuesText.append("ID: ").append(venue.getId())
-                        .append(", Naziv: ").append(venue.getName())
-                        .append(", Grad: ").append(venue.getPlace())
-                        .append(", Kapacitet: ").append(venue.getCapacity())
+                        .append(", Name: ").append(venue.getNaziv())
+                        .append(", City: ").append(venue.getGrad())
+                        .append(", Max Seats: ").append(venue.getBrojMjesta())
                         .append("\n");
                 anyMatch = true;
             }
         }
 
         if (!anyMatch) {
-            venuesText.append("Nema objekata koji odgovaraju zadatim filterima.");
+            venuesText.append("There is no venue that matches these filters.");
         }
 
         venueTextArea.setText(venuesText.toString());
@@ -129,7 +126,6 @@ public class ClientVenueList implements Initializable {
                 System.out.println("Greška pri parsiranju ID-a.");
             }
         }
-
     }
 
     public void deleteFilters() {
@@ -138,7 +134,6 @@ public class ClientVenueList implements Initializable {
         seatsFilter.clear();
         refreshVenueTextArea();
     }
-
 
     public void backToDashboard(MouseEvent event) throws IOException {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();

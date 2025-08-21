@@ -42,15 +42,14 @@ public class AdminVenueList implements Initializable {
     private void refreshVenueTextArea() {
         StringBuilder venuesText = new StringBuilder();
         if (Database.venues.isEmpty()) {
-            venuesText.append("Nema dostupnih objekata.");
+            venuesText.append("There is no available venues.");
         } else {
             for (Venue venue : Database.venues) {
-
-                if (venue.getStatus().equals("NA CEKANJU")){
+                if (venue.getStatus().equals("NA CEKANJU")) {
                     venuesText.append("ID: ").append(venue.getId())
-                            .append(", Naziv: ").append(venue.getName())
-                            .append(", Grad: ").append(venue.getPlace())
-                            .append(", Adresa: ").append(venue.getAddress())
+                            .append(", Name: ").append(venue.getNaziv())
+                            .append(", City: ").append(venue.getGrad())
+                            .append(", Address: ").append(venue.getAdresa())
                             .append(", Status: ").append(venue.getStatus())
                             .append("\n");
                 }
@@ -89,16 +88,15 @@ public class AdminVenueList implements Initializable {
 
             StringBuilder menusText = new StringBuilder();
             for (Menu menu : Database.menus) {
-                if (menu.getObjekatId() == selectedVenueId) {
-                    menusText.append(menu.getDescription()).append(", ")
-                            .append(menu.getPrice()).append("\n");
+                if (menu.getObjekat() != null && menu.getObjekat().getId() == selectedVenueId) {
+                    menusText.append(menu.getOpis()).append(", ")
+                            .append(menu.getCijenaPoOsobi()).append("\n");
                 }
             }
-            menuTextArea.setText(menusText.length() > 0 ? menusText.toString() : "Nema menija za ovaj objekat.");
+            menuTextArea.setText(menusText.length() > 0 ? menusText.toString() : "No menu for this venue.");
 
             venueTextArea.selectRange(lineStart, lineEnd - 1);
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            showAlert(Alert.AlertType.ERROR, "Greška", "Greška pri odabiru objekta. Kliknite na validan red.");
             venueTextArea.deselect();
             selectedVenueId = -1;
         }
@@ -109,17 +107,17 @@ public class AdminVenueList implements Initializable {
             Database.updateVenueStatus(selectedVenueId, "ODOBREN");
             Database.venues = Database.retrieveDataFromTable("objekat", Venue.class);
             refreshVenueTextArea();
-            showAlert(Alert.AlertType.INFORMATION, "Uspjeh", "Objekat odobren.");
+            showAlert(Alert.AlertType.INFORMATION, "Success", "Venue Accepted.");
             selectedVenueId = -1;
             venueTextArea.deselect();
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Greška", "Greška pri odobravanju objekta: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Error", "Error with approving the venue: " + e.getMessage());
         }
     }
 
     private void handleDecline() {
         if (selectedVenueId == -1) {
-            showAlert(Alert.AlertType.WARNING, "Upozorenje", "Nijedan objekat nije odabran.");
+            showAlert(Alert.AlertType.WARNING, "Warning", "No venue is selected.");
             return;
         }
 
@@ -137,7 +135,7 @@ public class AdminVenueList implements Initializable {
             if (newVal) cb1.setSelected(false);
         });
 
-        VBox content = new VBox(10, new Label("Unesi razlog odbijanja:"), cb1, cb2);
+        VBox content = new VBox(10, new Label("Enter reason for decline:"), cb1, cb2);
         alert.getDialogPane().setContent(content);
 
         alert.showAndWait().ifPresent(response -> {
@@ -152,28 +150,26 @@ public class AdminVenueList implements Initializable {
                         Database.addDeclineTextNotification(selectedVenueId, selectedReason);
                         Database.venues = Database.retrieveDataFromTable("objekat", Venue.class);
                         refreshVenueTextArea();
-                        showAlert(Alert.AlertType.INFORMATION, "Uspjeh", "Objekat odbijen.");
+                        showAlert(Alert.AlertType.INFORMATION, "Success", "Venue declined.");
                         selectedVenueId = -1;
                         venueTextArea.deselect();
                     } catch (Exception e) {
-                        showAlert(Alert.AlertType.ERROR, "Greška", "Greška pri odbijanju objekta: " + e.getMessage());
+                        showAlert(Alert.AlertType.ERROR, "Error", "Error with decline venue: " + e.getMessage());
                     }
                 } else {
-                    showAlert(Alert.AlertType.WARNING, "Upozorenje", "Morate izabrati razlog odbijanja.");
+                    showAlert(Alert.AlertType.WARNING, "Warning", "You must choose the reason for decline.");
                 }
             }
         });
     }
 
-
     private void showAlert(Alert.AlertType type, String title, String message) {
-            Alert alert = new Alert(type);
-            alert.setTitle(title);
-            alert.setHeaderText(null);
-            alert.setContentText(message);
-            alert.showAndWait();
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
-
 
     public void backToDashboard(MouseEvent event) throws IOException {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();

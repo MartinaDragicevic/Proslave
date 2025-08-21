@@ -2,27 +2,27 @@ package SistemZaPlaniranjeProslava;
 
 public class Table {
     private int id;
-    private int capacity;
-    private String position;
+    private Venue objekat;
+    private int broj_mjesta;
 
     public Table() {}
 
-    public Table(int id, int capacity, String position) {
+    public Table(int id, Venue objekat, int broj_mjesta) {
         this.id = id;
-        this.capacity = capacity;
-        this.position = position;
+        this.objekat = objekat;
+        this.broj_mjesta = broj_mjesta;
     }
 
     public int getId() { return id; }
-    public int getCapacity() { return capacity; }
-    public String getPosition() { return position; }
+    public Venue getObjekat() { return objekat; }
+    public int getBrojMjesta() { return broj_mjesta; }
 
     public void setId(int id) { this.id = id; }
-    public void setCapacity(int capacity) { this.capacity = capacity; }
-    public void setPosition(String position) { this.position = position; }
+    public void setObjekat(Venue objekat) { this.objekat = objekat; }
+    public void setBrojMjesta(int broj_mjesta) { this.broj_mjesta = broj_mjesta; }
 
     @Override
     public String toString() {
-        return "Table [id=" + id + ", capacity=" + capacity + ", position=" + position + "]";
+        return "Table [id=" + id + ", objekat=" + objekat + ", broj_mjesta=" + broj_mjesta + "]";
     }
 }

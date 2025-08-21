@@ -2,6 +2,7 @@ package project.proslave;
 
 import Database.Database;
 import SistemZaPlaniranjeProslava.Menu;
+import SistemZaPlaniranjeProslava.Owner;
 import SistemZaPlaniranjeProslava.Venue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -71,7 +72,7 @@ public class OwnerNewVenue {
         }
 
         try {
-            Venue newVenue = new Venue(0, currentVlasnikId, name, priceDouble, place, address, maxSeatsInt, tablesInt, null, 0.0, "NA ČEKANJU");
+            Venue newVenue = new Venue(0, new Owner(currentVlasnikId, "", "", "", "", "", ""), name, priceDouble, place, address, maxSeatsInt, tablesInt, new ArrayList<>(), 0.0, "NA ČEKANJU");
             Database.addVenue(newVenue, tablesInt, seatsPerTableInt, menus);
 
             Database.venues = Database.retrieveDataFromTable("objekat", Venue.class);
@@ -120,7 +121,7 @@ public class OwnerNewVenue {
                 try {
                     double price = Double.parseDouble(priceStr);
                     if (!description.isEmpty() && price > 0) {
-                        menus.add(new Menu(0, description, price));
+                        menus.add(new Menu(0, new Venue(), description, price));
                     }
                 } catch (NumberFormatException e) {
                     System.out.println("Error! Wrong input: " + e.getMessage());

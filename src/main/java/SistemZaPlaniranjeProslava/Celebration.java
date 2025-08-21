@@ -1,34 +1,57 @@
 package SistemZaPlaniranjeProslava;
 
+import java.time.LocalDate;
+
 public class Celebration {
     private int id;
-    private String name, date, time;
-    private int venueId;
+    private Venue objekat;
+    private Client klijent;
+    private Menu meni;
+    private String proslavacol;
+    private LocalDate datum;
+    private int brojGostiju;
+    private double ukupnaCijena;
+    private double uplacenIznos;
 
     public Celebration() {}
 
-    public Celebration(int id, String name, String date, String time, int venueId) {
+    public Celebration(int id, Venue objekat, Client klijent, Menu meni, String proslavacol, LocalDate datum, int brojGostiju, double ukupnaCijena, double uplacenIznos) {
         this.id = id;
-        this.name = name;
-        this.date = date;
-        this.time = time;
-        this.venueId = venueId;
+        this.objekat = objekat;
+        this.klijent = klijent;
+        this.meni = meni;
+        this.proslavacol = proslavacol;
+        this.datum = datum;
+        this.brojGostiju = brojGostiju;
+        this.ukupnaCijena = ukupnaCijena;
+        this.uplacenIznos = uplacenIznos;
     }
 
     public int getId() { return id; }
-    public String getName() { return name; }
-    public String getDate() { return date; }
-    public String getTime() { return time; }
-    public int getVenueId() { return venueId; }
+    public Venue getObjekat() { return objekat; }
+    public Client getKlijent() { return klijent; }
+    public Menu getMeni() { return meni; }
+    public String getProslavacol() { return proslavacol; }
+    public LocalDate getDatum() { return datum; }
+    public int getBrojGostiju() { return brojGostiju; }
+    public double getUkupnaCijena() { return ukupnaCijena; }
+    public double getUplacenIznos() { return uplacenIznos; }
 
     public void setId(int id) { this.id = id; }
-    public void setName(String name) { this.name = name; }
-    public void setDate(String date) { this.date = date; }
-    public void setTime(String time) { this.time = time; }
-    public void setVenueId(int venueId) { this.venueId = venueId; }
+    public void setObjekat(Venue objekat) { this.objekat = objekat; }
+    public void setKlijent(Client klijent) { this.klijent = klijent; }
+    public void setMeni(Menu meni) { this.meni = meni; }
+    public void setProslavacol(String proslavacol) { this.proslavacol = proslavacol; }
+    public void setDatum(LocalDate datum) { this.datum = datum; }
+    public void setBrojGostiju(int brojGostiju) { this.brojGostiju = brojGostiju; }
+    public void setUkupnaCijena(double ukupnaCijena) { this.ukupnaCijena = ukupnaCijena; }
+    public void setUplacenIznos(double uplacenIznos) { this.uplacenIznos = uplacenIznos; }
 
     @Override
     public String toString() {
-        return "Celebration [id=" + id + ", name=" + name + ", date=" + date + ", time=" + time + ", venueId=" + venueId + "]";
+        return "Celebration [id=" + id + ", objekat=" + objekat + ", klijent=" + klijent +
+                ", meni=" + meni + ", proslavacol=" + proslavacol + ", datum=" + datum +
+                ", brojGostiju=" + brojGostiju + ", ukupnaCijena=" + ukupnaCijena +
+                ", uplacenIznos=" + uplacenIznos + "]";
     }
 }

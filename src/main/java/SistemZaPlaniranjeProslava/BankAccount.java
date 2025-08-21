@@ -2,7 +2,8 @@ package SistemZaPlaniranjeProslava;
 
 public class BankAccount {
     private int id;
-    private String broj_racuna, jmbg;
+    private String broj_racuna;
+    private String jmbg;
     private double stanje;
 
     public BankAccount() {}

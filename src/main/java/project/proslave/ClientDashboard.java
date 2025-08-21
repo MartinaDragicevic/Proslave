@@ -89,4 +89,9 @@ public class ClientDashboard {
         stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("client_venueList.fxml"))));
         stage.show();
     }
+    public void editVenue(ActionEvent event) throws IOException {
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("client_reservedVenues.fxml"))));
+        stage.show();
+    }
 }

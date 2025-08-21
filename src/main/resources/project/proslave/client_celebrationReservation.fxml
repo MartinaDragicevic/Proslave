@@ -34,12 +34,12 @@
          <font>
             <Font size="25.0" />
          </font></TextArea>
-      <Button layoutX="743.0" layoutY="536.0" mnemonicParsing="false" style="-fx-background-color: green; -fx-text-fill: white;" text="Confirm Reservation">
+      <Button fx:id="confirmReservation" layoutX="743.0" layoutY="536.0" mnemonicParsing="false" onAction="#handleConfirmReservation" style="-fx-background-color: green; -fx-text-fill: white;" text="Confirm Reservation">
          <font>
             <Font size="18.0" />
          </font>
       </Button>
-      <DatePicker layoutX="749.0" layoutY="359.0" />
+      <DatePicker fx:id="celebrationDatePicker" layoutX="749.0" layoutY="359.0" />
       <Text layoutX="776.0" layoutY="340.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Choose Date">
          <font>
             <Font name="Berlin Sans FB" size="23.0" />
@@ -50,6 +50,6 @@
             <Font name="Berlin Sans FB" size="23.0" />
          </font>
       </Text>
-      <ChoiceBox fx:id="menuChoiceBox" layoutX="720.0" layoutY="191.0" prefHeight="27.0" prefWidth="208.0" />
+      <ChoiceBox fx:id="menuChoiceBox" layoutX="681.0" layoutY="191.0" prefHeight="27.0" prefWidth="296.0" />
     </children>
 </AnchorPane>

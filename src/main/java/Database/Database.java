@@ -9,6 +9,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.time.LocalDate;
 
 public class Database {
     private static String DB_user = "root";
@@ -27,7 +28,6 @@ public class Database {
     public static List<Table> tables = retrieveDataFromTable("sto", Table.class);
     public static List<TableLayout> schedules = retrieveDataFromTable("raspored", TableLayout.class);
     public static List<Notification> notifications = retrieveDataFromTable("obavjestenje", Notification.class);
-
 
     public static void DBConnect() throws SQLException {
         connectionUrl = "jdbc:mysql://localhost" + ":" + port + "/" + DB_name;
@@ -174,7 +174,6 @@ public class Database {
         return balance;
     }
 
-
     public static void addVenue(Venue venue, int tablesNumber, int seatsPerTable, List<Menu> menus) throws SQLException {
         Connection conn = null;
         PreparedStatement venueStmt = null;
@@ -187,16 +186,17 @@ public class Database {
             conn = connection;
             conn.setAutoCommit(false);
 
+            String datumiString = venue.getDatumi() != null ? String.join(",", venue.getDatumi().stream().map(LocalDate::toString).toArray(String[]::new)) : "";
             String venueQuery = "INSERT INTO objekat (Vlasnik_id, naziv, cijena_rezervacije, grad, adresa, broj_mjesta, broj_stolova, datumi, zarada, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             venueStmt = conn.prepareStatement(venueQuery, Statement.RETURN_GENERATED_KEYS);
-            venueStmt.setInt(1, venue.getOwnerId());
-            venueStmt.setString(2, venue.getName());
-            venueStmt.setDouble(3, venue.getReservationPrice());
-            venueStmt.setString(4, venue.getPlace());
-            venueStmt.setString(5, venue.getAddress());
-            venueStmt.setInt(6, venue.getCapacity());
-            venueStmt.setInt(7, venue.getBrojStolova());
-            venueStmt.setString(8, venue.getDatumi());
+            venueStmt.setInt(1, venue.getVlasnik().getId());
+            venueStmt.setString(2, venue.getNaziv());
+            venueStmt.setDouble(3, venue.getCijenaRezervacije());
+            venueStmt.setString(4, venue.getGrad());
+            venueStmt.setString(5, venue.getAdresa());
+            venueStmt.setInt(6, venue.getBrojMjesta());
+            venueStmt.setInt(7, tablesNumber);
+            venueStmt.setString(8, datumiString);
             venueStmt.setDouble(9, venue.getZarada());
             venueStmt.setString(10, "NA ČEKANJU");
             venueStmt.executeUpdate();
@@ -213,17 +213,19 @@ public class Database {
             String menuQuery = "INSERT INTO meni (opis, cijena_po_osobi, Objekat_id) VALUES (?, ?, ?)";
             menuStmt = conn.prepareStatement(menuQuery);
             for (Menu menu : menus) {
-                menuStmt.setString(1, menu.getDescription());
-                menuStmt.setDouble(2, menu.getPrice());
+                menuStmt.setString(1, menu.getOpis());
+                menuStmt.setDouble(2, menu.getCijenaPoOsobi());
                 menuStmt.setInt(3, venueId);
                 menuStmt.executeUpdate();
             }
 
             String tableQuery = "INSERT INTO sto (broj_mjesta, Objekat_id) VALUES (?, ?)";
             tableStmt = conn.prepareStatement(tableQuery);
-            tableStmt.setInt(1, seatsPerTable);
-            tableStmt.setInt(2, venueId);
-            tableStmt.executeUpdate();
+            for (int i = 0; i < tablesNumber; i++) {
+                tableStmt.setInt(1, seatsPerTable);
+                tableStmt.setInt(2, venueId);
+                tableStmt.executeUpdate();
+            }
 
             conn.commit();
         } catch (SQLException e) {
@@ -282,29 +284,87 @@ public class Database {
 
     public static void loadNotifications() {
         notifications.clear();
-        String query = "SELECT * FROM obavjestenje";
-
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
         try {
             DBConnect();
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-
+            conn = connection;
+            String query = "SELECT * FROM obavjestenje";
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(query);
             while (rs.next()) {
                 int id = rs.getInt("id");
                 int objekatId = rs.getInt("Objekat_id");
                 String tekst = rs.getString("tekst");
-
-                notifications.add(new Notification(id, objekatId, tekst));
+                Venue venue = venues.stream().filter(v -> v.getId() == objekatId).findFirst().orElse(null);
+                notifications.add(new Notification(id, venue, tekst));
             }
-
-            rs.close();
-            stmt.close();
-            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
+    public static void addCelebration(Celebration celebration) throws SQLException {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet generatedKeys = null;
+
+        try {
+            DBConnect();
+            conn = connection;
+            String query = "INSERT INTO proslava (Objekat_id, Klijent_id, Meni_id, proslavacol, datum, broj_gostiju, ukupna_cijena, uplacen_iznos) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            pstmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            pstmt.setInt(1, celebration.getObjekat().getId());
+            pstmt.setInt(2, celebration.getKlijent().getId());
+            pstmt.setInt(3, celebration.getMeni().getId());
+            pstmt.setString(4, celebration.getProslavacol());
+            pstmt.setObject(5, celebration.getDatum());
+            pstmt.setInt(6, celebration.getBrojGostiju());
+            pstmt.setDouble(7, celebration.getUkupnaCijena());
+            pstmt.setDouble(8, celebration.getUplacenIznos());
+            pstmt.executeUpdate();
+
+            generatedKeys = pstmt.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                celebration.setId(generatedKeys.getInt(1));
+            }
+            celebrations.add(celebration);
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            if (generatedKeys != null) generatedKeys.close();
+            if (pstmt != null) pstmt.close();
+            if (conn != null) conn.close();
+        }
+    }
+
+    public static void updateVenueDates(int venueId, String datumiString) throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try {
+            DBConnect();
+            conn = connection;
+            String query = "UPDATE objekat SET datumi = ? WHERE id = ?";
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, datumiString);
+            stmt.setInt(2, venueId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            if (stmt != null) stmt.close();
+            if (conn != null) conn.close();
+        }
+    }
 
     public static <T> List<T> retrieveDataFromTable(String tableName, Class<T> clazz) {
         List<T> list = new ArrayList<>();
@@ -337,6 +397,11 @@ public class Database {
                         if (columnName.equals("description")) columnName = "opis";
                         else if (columnName.equals("price")) columnName = "cijena_po_osobi";
                         else if (columnName.equals("objekatId")) columnName = "Objekat_id";
+                    } else if (tableName.equals("proslava")) {
+                        if (columnName.equals("datum")) {
+                            java.sql.Date sqlDate = resultSet.getDate("datum");
+                            field.set(obj, sqlDate != null ? sqlDate.toLocalDate() : null);
+                        }
                     }
                     try {
                         if (field.getType() == int.class) {
@@ -350,6 +415,10 @@ public class Database {
                             field.set(obj, resultSet.getBigDecimal(columnName));
                         } else if (field.getType() == double.class) {
                             field.setDouble(obj, resultSet.getDouble(columnName));
+                        } else if (field.getType() == Venue.class && tableName.equals("meni")) {
+                            int venueId = resultSet.getInt("Objekat_id");
+                            Venue venue = venues.stream().filter(v -> v.getId() == venueId).findFirst().orElse(null);
+                            field.set(obj, venue);
                         }
                     } catch (SQLException e) {
                         continue;
@@ -364,5 +433,4 @@ public class Database {
         }
         return list;
     }
-
 }

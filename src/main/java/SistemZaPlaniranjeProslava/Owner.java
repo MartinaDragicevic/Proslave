@@ -2,7 +2,12 @@ package SistemZaPlaniranjeProslava;
 
 public class Owner {
     private int id;
-    private String ime, prezime, jmbg, broj_racuna, korisnicko_ime, lozinka;
+    private String ime;
+    private String prezime;
+    private String jmbg;
+    private String broj_racuna;
+    private String korisnicko_ime;
+    private String lozinka;
 
     public Owner() {}
 
@@ -28,12 +33,12 @@ public class Owner {
     public void setIme(String ime) { this.ime = ime; }
     public void setPrezime(String prezime) { this.prezime = prezime; }
     public void setJmbg(String jmbg) { this.jmbg = jmbg; }
-    public void setBrojRacuna(String korisnicko_ime) { this.broj_racuna = korisnicko_ime; }
-    public void setKorisnickoIme(String korisnickoIme) { this.korisnicko_ime = korisnickoIme; }
+    public void setBrojRacuna(String broj_racuna) { this.broj_racuna = broj_racuna; }
+    public void setKorisnickoIme(String korisnicko_ime) { this.korisnicko_ime = korisnicko_ime; }
     public void setLozinka(String lozinka) { this.lozinka = lozinka; }
 
     @Override
     public String toString() {
-        return "Owner [id=" + id + ", ime=" + ime + ", prezime=" + prezime + ", jmbg=" + jmbg + ", broj racuna=" + broj_racuna + ", korisnicko ime=" + korisnicko_ime + ", lozinka=" + lozinka + "]";
+        return "Owner [id=" + id + ", ime=" + ime + ", prezime=" + prezime + ", jmbg=" + jmbg + ", broj_racuna=" + broj_racuna + ", korisnicko_ime=" + korisnicko_ime + ", lozinka=" + lozinka + "]";
     }
 }

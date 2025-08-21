@@ -70,7 +70,7 @@
             <Font size="35.0" />
          </font>
       </Label>
-      <Pane layoutX="610.0" layoutY="266.0" prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: purple;" styleClass="round">
+      <Pane layoutX="503.0" layoutY="266.0" prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: purple;" styleClass="round">
          <children>
             <Label layoutX="31.0" layoutY="43.0" text="See Venues List">
                <font>
@@ -129,5 +129,26 @@
             <Font size="20.0" />
          </font>
       </Label>
+      <Pane layoutX="747.0" layoutY="266.0" prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: purple;" styleClass="round">
+         <children>
+            <Label layoutX="51.0" layoutY="43.0" text="Edit Venue">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </Label>
+            <Button layoutX="53.0" layoutY="120.0" mnemonicParsing="false" onAction="#editVenue" prefHeight="30.0" prefWidth="94.0" style="-fx-background-color: black;" stylesheets="@../../css/css_file.css" text="Click Here" textFill="WHITE">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <styleClass>
+                  <String fx:value="round_click" />
+                  <String fx:value="glowing_button" />
+               </styleClass>
+               <effect>
+                  <Reflection topOpacity="0.25" />
+               </effect>
+            </Button>
+         </children>
+      </Pane>
    </children>
 </AnchorPane>

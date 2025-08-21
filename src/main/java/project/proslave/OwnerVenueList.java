@@ -10,8 +10,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -39,19 +37,19 @@ public class OwnerVenueList implements Initializable {
     private void refreshVenueTextArea() {
         StringBuilder venuesText = new StringBuilder();
         if (Database.venues.isEmpty()) {
-            venuesText.append("Nema dostupnih objekata.");
+            venuesText.append("There is no available venues.");
         } else {
             for (Venue venue : Database.venues) {
                 venuesText.append("ID: ").append(venue.getId())
-                        .append(", Naziv: ").append(venue.getName())
-                        .append(", Grad: ").append(venue.getPlace())
-                        .append(", Adresa: ").append(venue.getAddress())
+                        .append(", Name: ").append(venue.getNaziv())
+                        .append(", City: ").append(venue.getGrad())
+                        .append(", Address: ").append(venue.getAdresa())
                         .append(", Status: ").append(venue.getStatus());
 
                 if (venue.getStatus().equals("ODBIJEN")) {
                     for (Notification notification : Database.notifications) {
-                        if (notification.getObjekatId() == venue.getId()) {
-                            venuesText.append(", Razlog: ").append(notification.getText());
+                        if (notification.getObjekat() != null && notification.getObjekat().getId() == venue.getId()) {
+                            venuesText.append(", Reason: ").append(notification.getTekst());
                         }
                     }
                 }
@@ -61,7 +59,6 @@ public class OwnerVenueList implements Initializable {
         }
         venueTextArea.setText(venuesText.toString());
     }
-
 
     private void handleVenueSelection(MouseEvent event) {
         if (event.getClickCount() != 1 || event.getButton() != MouseButton.PRIMARY) {
@@ -92,26 +89,17 @@ public class OwnerVenueList implements Initializable {
 
             StringBuilder menusText = new StringBuilder();
             for (Menu menu : Database.menus) {
-                if (menu.getObjekatId() == selectedVenueId) {
-                    menusText.append(menu.getDescription()).append(", ")
-                            .append(menu.getPrice()).append("\n");
+                if (menu.getObjekat() != null && menu.getObjekat().getId() == selectedVenueId) {
+                    menusText.append(menu.getOpis()).append(", ")
+                            .append(menu.getCijenaPoOsobi()).append("\n");
                 }
             }
 
             venueTextArea.selectRange(lineStart, lineEnd - 1);
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            showAlert(Alert.AlertType.ERROR, "Greška", "Greška pri odabiru objekta. Kliknite na validan red.");
             venueTextArea.deselect();
             selectedVenueId = -1;
         }
-    }
-
-    private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 
     public void backToDashboard(MouseEvent event) throws IOException {
