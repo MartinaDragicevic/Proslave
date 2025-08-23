@@ -366,6 +366,42 @@ public class Database {
         }
     }
 
+    public static void updateClientBalance(String accountNumber, double newBalance) throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try {
+            DBConnect();
+            conn = connection;
+            conn.setAutoCommit(false);
+
+            double currentBalance = getAccountBalance(accountNumber);
+            if (newBalance < 0 && currentBalance + newBalance < 0) {
+                throw new SQLException("Insufficient funds: Balance cannot go below zero.");
+            }
+
+            String query = "UPDATE `bankovni racun` SET stanje = ? WHERE broj_racuna = ?";
+            stmt = conn.prepareStatement(query);
+            stmt.setDouble(1, newBalance);
+            stmt.setString(2, accountNumber);
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected == 0) {
+                throw new SQLException("Account not found or update failed.");
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                conn.rollback();
+            }
+            throw e;
+        } finally {
+            if (stmt != null) stmt.close();
+            if (conn != null) conn.close();
+        }
+    }
+
+
     public static <T> List<T> retrieveDataFromTable(String tableName, Class<T> clazz) {
         List<T> list = new ArrayList<>();
 
@@ -382,14 +418,76 @@ public class Database {
                 for (Field field : fields) {
                     field.setAccessible(true);
                     String columnName = field.getName();
-                    if (tableName.equals("objekat")) {
-                        if (columnName.equals("ownerId")) columnName = "Vlasnik_id";
-                        else if (columnName.equals("name")) columnName = "naziv";
-                        else if (columnName.equals("reservationPrice")) columnName = "cijena_rezervacije";
-                        else if (columnName.equals("place")) columnName = "grad";
-                        else if (columnName.equals("address")) columnName = "adresa";
-                        else if (columnName.equals("capacity")) columnName = "broj_mjesta";
-                        else if (columnName.equals("brojStolova")) columnName = "broj_stolova";
+                    if (tableName.equals("proslava")) {
+                        if (columnName.equals("id")) {
+                            field.setInt(obj, resultSet.getInt("id"));
+                        } else if (columnName.equals("objekat")) {
+                            int venueId = resultSet.getInt("Objekat_id");
+                            Venue venue = (venues != null) ? venues.stream().filter(v -> v.getId() == venueId).findFirst().orElse(null) : null;
+                            if (venue == null && venues == null) {
+                                System.out.println("Venues list is null, cannot map Objekat_id: " + venueId);
+                            } else if (venue == null) {
+                                System.out.println("No venue found for Objekat_id: " + venueId);
+                            }
+                            field.set(obj, venue);
+                        } else if (columnName.equals("klijent")) {
+                            int clientId = resultSet.getInt("Klijent_id");
+                            Client client = (clients != null) ? clients.stream().filter(c -> c.getId() == clientId).findFirst().orElse(null) : null;
+                            if (client == null && clients == null) {
+                                System.out.println("Clients list is null, cannot map Klijent_id: " + clientId);
+                            } else if (client == null) {
+                                System.out.println("No client found for Klijent_id: " + clientId);
+                            }
+                            field.set(obj, client);
+                        } else if (columnName.equals("meni")) {
+                            int menuId = resultSet.getInt("Meni_id");
+                            Menu menu = (menus != null) ? menus.stream().filter(m -> m.getId() == menuId).findFirst().orElse(null) : null;
+                            if (menu == null && menus == null) {
+                                //System.out.println("Menus list is null, cannot map Meni_id: " + menuId);
+                            } else if (menu == null) {
+                                //System.out.println("No menu found for Meni_id: " + menuId);
+                            }
+                            field.set(obj, menu);
+                        } else if (columnName.equals("datum")) {
+                            java.sql.Date sqlDate = resultSet.getDate("datum");
+                            field.set(obj, sqlDate != null ? sqlDate.toLocalDate() : null);
+                        } else if (columnName.equals("proslavacol")) {
+                            field.set(obj, resultSet.getString("proslavacol"));
+                        } else if (columnName.equals("brojGostiju")) {
+                            field.setInt(obj, resultSet.getInt("broj_gostiju"));
+                        } else if (columnName.equals("ukupnaCijena")) {
+                            field.setDouble(obj, resultSet.getDouble("ukupna_cijena"));
+                        } else if (columnName.equals("uplacenIznos")) {
+                            field.setDouble(obj, resultSet.getDouble("uplacen_iznos"));
+                        }
+                    } else if (tableName.equals("objekat")) {
+                        if (columnName.equals("id")) columnName = "id";
+                        else if (columnName.equals("vlasnik")) {
+                            int ownerId = resultSet.getInt("Vlasnik_id");
+                            Owner owner = (owners != null) ? owners.stream().filter(o -> o.getId() == ownerId).findFirst().orElse(null) : null;
+                            if (owner == null && owners == null) {
+                                System.out.println("Owners list is null, cannot map Vlasnik_id: " + ownerId);
+                            } else if (owner == null) {
+                                System.out.println("No owner found for Vlasnik_id: " + ownerId);
+                            }
+                            field.set(obj, owner);
+                        } else if (columnName.equals("naziv")) columnName = "naziv";
+                        else if (columnName.equals("cijena_rezervacije")) columnName = "cijena_rezervacije";
+                        else if (columnName.equals("grad")) columnName = "grad";
+                        else if (columnName.equals("adresa")) columnName = "adresa";
+                        else if (columnName.equals("broj_mjesta")) columnName = "broj_mjesta";
+                        else if (columnName.equals("broj_stolova")) columnName = "broj_stolova";
+                        else if (columnName.equals("datumi")) {
+                            String datumiString = resultSet.getString("datumi");
+                            if (datumiString != null && !datumiString.isEmpty()) {
+                                List<LocalDate> datumi = new ArrayList<>();
+                                for (String dateStr : datumiString.split(",")) {
+                                    datumi.add(LocalDate.parse(dateStr.trim()));
+                                }
+                                field.set(obj, datumi);
+                            }
+                        } else if (columnName.equals("zarada")) columnName = "zarada";
+                        else if (columnName.equals("status")) columnName = "status";
                     } else if (tableName.equals("sto")) {
                         if (columnName.equals("capacity")) columnName = "broj_mjesta";
                         else if (columnName.equals("objekatId")) columnName = "Objekat_id";
@@ -397,11 +495,6 @@ public class Database {
                         if (columnName.equals("description")) columnName = "opis";
                         else if (columnName.equals("price")) columnName = "cijena_po_osobi";
                         else if (columnName.equals("objekatId")) columnName = "Objekat_id";
-                    } else if (tableName.equals("proslava")) {
-                        if (columnName.equals("datum")) {
-                            java.sql.Date sqlDate = resultSet.getDate("datum");
-                            field.set(obj, sqlDate != null ? sqlDate.toLocalDate() : null);
-                        }
                     }
                     try {
                         if (field.getType() == int.class) {
@@ -409,15 +502,19 @@ public class Database {
                         } else if (field.getType() == String.class) {
                             String value = resultSet.getString(columnName);
                             field.set(obj, value != null ? value : "");
-                        } else if (field.getType() == Date.class) {
-                            field.set(obj, resultSet.getDate(columnName));
-                        } else if (field.getType() == BigDecimal.class) {
-                            field.set(obj, resultSet.getBigDecimal(columnName));
+                        } else if (field.getType() == LocalDate.class) {
+                            java.sql.Date sqlDate = resultSet.getDate(columnName);
+                            field.set(obj, sqlDate != null ? sqlDate.toLocalDate() : null);
                         } else if (field.getType() == double.class) {
                             field.setDouble(obj, resultSet.getDouble(columnName));
                         } else if (field.getType() == Venue.class && tableName.equals("meni")) {
                             int venueId = resultSet.getInt("Objekat_id");
-                            Venue venue = venues.stream().filter(v -> v.getId() == venueId).findFirst().orElse(null);
+                            Venue venue = (venues != null) ? venues.stream().filter(v -> v.getId() == venueId).findFirst().orElse(null) : null;
+                            if (venue == null && venues == null) {
+                                System.out.println("Venues list is null, cannot map Objekat_id: " + venueId);
+                            } else if (venue == null) {
+                                System.out.println("No venue found for Objekat_id: " + venueId);
+                            }
                             field.set(obj, venue);
                         }
                     } catch (SQLException e) {

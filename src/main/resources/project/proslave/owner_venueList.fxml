@@ -33,25 +33,25 @@
             <Font name="Berlin Sans FB" size="23.0" />
          </font>
       </Text>
-      <TextArea layoutX="627.0" layoutY="108.0" prefHeight="152.0" prefWidth="510.0" />
+      <TextArea fx:id="activeCelebrations" layoutX="627.0" layoutY="108.0" prefHeight="152.0" prefWidth="510.0" />
       <Text layoutX="735.0" layoutY="286.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Previous Celebrations in Venue">
          <font>
             <Font name="Berlin Sans FB" size="23.0" />
          </font>
       </Text>
-      <TextArea layoutX="627.0" layoutY="299.0" prefHeight="152.0" prefWidth="510.0" />
+      <TextArea fx:id="previousCelebration" layoutX="627.0" layoutY="299.0" prefHeight="152.0" prefWidth="510.0" />
       <Text layoutX="793.0" layoutY="478.0" strokeType="OUTSIDE" strokeWidth="0.0" text="About Celebration">
          <font>
             <Font name="Berlin Sans FB" size="23.0" />
          </font>
       </Text>
-      <TextArea layoutX="627.0" layoutY="489.0" prefHeight="152.0" prefWidth="510.0" />
+      <TextArea fx:id="aboutCelebration" layoutX="627.0" layoutY="489.0" prefHeight="152.0" prefWidth="510.0" />
       <Text layoutX="181.0" layoutY="628.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Earned Money:">
          <font>
             <Font name="Berlin Sans FB" size="23.0" />
          </font>
       </Text>
-      <Text layoutX="340.0" layoutY="628.0" strokeType="OUTSIDE" strokeWidth="0.0" text="_______">
+      <Text fx:id="earnedMoney" layoutX="331.0" layoutY="626.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="229.0">
          <font>
             <Font name="Berlin Sans FB" size="23.0" />
          </font>

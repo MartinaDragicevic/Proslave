@@ -65,13 +65,11 @@ public class ClientCelebrationReservation implements Initializable {
         int selectedId = ClientVenueList.selectedVenueId;
         menuChoiceBox.getItems().clear();
 
-        // Pronađi odabrani Venue
         Venue selectedVenue = Database.venues.stream()
                 .filter(v -> v.getId() == selectedId)
                 .findFirst().orElse(null);
 
         if (selectedVenue != null) {
-            // Pronađi sve menije povezane s ovim Venue-om
             for (Menu menu : Database.menus) {
                 if (menu.getObjekat() != null && menu.getObjekat().getId() == selectedId) {
                     String menuEntry = "Description: " + menu.getOpis() + " | Price: " + menu.getCijenaPoOsobi() + " KM";
@@ -79,13 +77,12 @@ public class ClientCelebrationReservation implements Initializable {
                 }
             }
 
-            // Osiguraj da je ChoiceBox omogućen samo ako postoji barem jedan meni
             if (menuChoiceBox.getItems().isEmpty()) {
                 menuChoiceBox.setDisable(true);
-                menuChoiceBox.getItems().add("Error: No menus found for this venue."); // Sigurnosna mjera
+                menuChoiceBox.getItems().add("Error: No menus found for this venue.");
             } else {
                 menuChoiceBox.setDisable(false);
-                menuChoiceBox.getSelectionModel().selectFirst(); // Automatski odaberi prvi meni
+                menuChoiceBox.getSelectionModel().selectFirst();
             }
         } else {
             menuChoiceBox.setDisable(true);
@@ -115,7 +112,6 @@ public class ClientCelebrationReservation implements Initializable {
             return;
         }
 
-        // Provjera dostupnosti datuma
         if (venue.getDatumi() != null && venue.getDatumi().contains(selectedDate)) {
             showAlert(Alert.AlertType.ERROR, "Error", "Selected date is already booked.");
             return;
@@ -126,7 +122,6 @@ public class ClientCelebrationReservation implements Initializable {
             return;
         }
 
-        // Pronađi ulogovanog klijenta
         String loggedInUsername = Login.getClientUsername();
         Client client = Database.clients.stream()
                 .filter(c -> c.getKorisnickoIme().equals(loggedInUsername))
@@ -136,7 +131,6 @@ public class ClientCelebrationReservation implements Initializable {
             return;
         }
 
-        // Pronađi meni
         Menu menu = Database.menus.stream()
                 .filter(m -> m.getObjekat() != null && m.getObjekat().getId() == selectedVenueId
                         && ("Description: " + m.getOpis() + " | Price: " + m.getCijenaPoOsobi() + " KM").equals(selectedMenu))
@@ -146,25 +140,38 @@ public class ClientCelebrationReservation implements Initializable {
             return;
         }
 
-        // Kreiraj novu rezervaciju
-        Celebration celebration = new Celebration(
-                0, // ID će biti generiran u bazi
-                venue,
-                client,
-                menu,
-                "Default Celebration", // Placeholder za proslavacol
-                selectedDate,
-                10, // Placeholder za broj gostiju
-                venue.getCijenaRezervacije() + (menu.getCijenaPoOsobi() * 10), // Proračun ukupne cijene
-                0.0 // Placeholder za uplaćeni iznos
-        );
+        double reservationPrice = venue.getCijenaRezervacije(); // Cijena koju klijent plaća za rezervaciju
+        double clientBalance = Database.getAccountBalance(client.getBrojRacuna());
+        if (clientBalance < reservationPrice) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Insufficient funds. Required: $" + reservationPrice);
+            return;
+        }
+
+        String ownerAccountNumber = venue.getVlasnik().getBrojRacuna();
+        double ownerBalance = Database.getAccountBalance(ownerAccountNumber);
 
         try {
-            // Spremi rezervaciju u bazu
+            Database.updateClientBalance(client.getBrojRacuna(), clientBalance - reservationPrice);
+            Database.updateClientBalance(ownerAccountNumber, ownerBalance + reservationPrice);
+
+            Celebration celebration = new Celebration(
+                    0,
+                    venue,
+                    client,
+                    menu,
+                    "Celebration",
+                    selectedDate,
+                    10,
+                    reservationPrice + (menu.getCijenaPoOsobi() * 10),
+                    reservationPrice
+            );
+
             Database.addCelebration(celebration);
-            // Ažuriraj datume u bazi i lokalni Venue objekt
-            updateVenueDates(selectedVenueId, selectedDate, venue);
-            // Dohvati trenutni Stage i vratiti se na listu lokacija
+            List<LocalDate> datumi = venue.getDatumi() != null ? new ArrayList<>(venue.getDatumi()) : new ArrayList<>();
+            datumi.add(selectedDate);
+            String datumiString = String.join(",", datumi.stream().map(LocalDate::toString).toArray(String[]::new));
+            Database.updateVenueDates(selectedVenueId, datumiString);
+            showAlert(Alert.AlertType.INFORMATION, "Success", "Reservation confirmed. New balance: $" + (clientBalance - reservationPrice));
             Stage stage = (Stage) confirmReservation.getScene().getWindow();
             stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("client_venueList.fxml"))));
             stage.show();

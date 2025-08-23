@@ -17,7 +17,7 @@
                 <Font name="Berlin Sans FB" size="14.0" />
             </font>
         </Label>
-        <Text layoutX="498.0" layoutY="49.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Edit Reserved Venues">
+        <Text layoutX="519.0" layoutY="49.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Reserved Venues">
             <font>
                 <Font name="Berlin Sans FB" size="23.0" />
             </font>
