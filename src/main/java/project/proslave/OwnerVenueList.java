@@ -160,14 +160,14 @@ public class OwnerVenueList implements Initializable {
                         selectedCelebrationId = celebrationId;
                         Menu menu = celebration.getMeni();
                         aboutCelebration.setText(String.format(
-                                "Celebration ID: %d\nDate: %s\nGuests: %d\nTotal Price: $%.2f\nPaid: $%.2f\n" +
-                                        "Paid in Full: %s\nMenu: %s\nMenu Price per Person: $%.2f",
-                                celebration.getId(), celebration.getDatum(),
-                                celebration.getBrojGostiju(), celebration.getUkupnaCijena(),
+                                "Date: %s\n" +
+                                "Guests: %d\n" +
+                                "Price: $%.2f\n" +
+                                "Menu: %s\n",
+                                celebration.getDatum(),
+                                celebration.getBrojGostiju(),
                                 celebration.getUplacenIznos(),
-                                celebration.getUplacenIznos() == celebration.getUkupnaCijena() ? "Yes" : "No",
-                                menu != null ? menu.getOpis() : "No menu",
-                                menu != null ? menu.getCijenaPoOsobi() : 0.0));
+                                menu != null ? menu.getOpis() : "No menu"));
                     }
                 } catch (NumberFormatException e) {
                     aboutCelebration.setText("Invalid selection.");

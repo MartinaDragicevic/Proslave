@@ -131,7 +131,7 @@
       </Label>
       <Pane layoutX="747.0" layoutY="266.0" prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: purple;" styleClass="round">
          <children>
-            <Label layoutX="51.0" layoutY="43.0" text="Edit Venue">
+            <Label layoutX="41.0" layoutY="30.0" text="See Reserved">
                <font>
                   <Font size="20.0" />
                </font>
@@ -148,6 +148,11 @@
                   <Reflection topOpacity="0.25" />
                </effect>
             </Button>
+            <Label layoutX="67.0" layoutY="60.0" text="Venues">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </Label>
          </children>
       </Pane>
    </children>

@@ -401,6 +401,22 @@ public class Database {
         }
     }
 
+    public static void updateCelebrationMenu(int celebrationId, int menuId) throws SQLException {
+        String updateQuery = "UPDATE proslava SET Meni_id = ? WHERE id = ?";
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/sistemzaplaniranjeproslava", "root", "");
+             PreparedStatement preparedStatement = conn.prepareStatement(updateQuery)) {
+            preparedStatement.setInt(1, menuId);
+            preparedStatement.setInt(2, celebrationId);
+            int rowsAffected = preparedStatement.executeUpdate();
+            if (rowsAffected == 0) {
+                System.out.println("No rows updated for celebrationId: " + celebrationId + ", menuId: " + menuId);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
 
     public static <T> List<T> retrieveDataFromTable(String tableName, Class<T> clazz) {
         List<T> list = new ArrayList<>();

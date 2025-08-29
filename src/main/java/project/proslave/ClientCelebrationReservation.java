@@ -140,7 +140,7 @@ public class ClientCelebrationReservation implements Initializable {
             return;
         }
 
-        double reservationPrice = venue.getCijenaRezervacije(); // Cijena koju klijent plaća za rezervaciju
+        double reservationPrice = venue.getCijenaRezervacije();
         double clientBalance = Database.getAccountBalance(client.getBrojRacuna());
         if (clientBalance < reservationPrice) {
             showAlert(Alert.AlertType.ERROR, "Error", "Insufficient funds. Required: $" + reservationPrice);
