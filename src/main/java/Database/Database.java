@@ -366,6 +366,91 @@ public class Database {
         }
     }
 
+    public static void updateCelebrationProslavacol(int celebrationId, String proslavacol) throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try {
+            DBConnect();
+            conn = connection;
+            String query = "UPDATE proslava SET proslavacol = ? WHERE id = ?";
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, proslavacol);
+            stmt.setInt(2, celebrationId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            if (stmt != null) stmt.close();
+            if (conn != null) conn.close();
+        }
+    }
+
+    public static void transferMoney(String fromAccount, String toAccount, double amount) throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmtFrom = null;
+        PreparedStatement stmtTo = null;
+        try {
+            DBConnect();
+            conn = connection;
+            conn.setAutoCommit(false);
+
+            double fromBalance = getAccountBalance(fromAccount);
+            if (fromBalance < amount) {
+                throw new SQLException("Nedovoljno sredstava na računu pošiljaoca (" + fromAccount + "): " + fromBalance + " KM, potrebno: " + amount + " KM");
+            }
+
+            String checkAccountQuery = "SELECT COUNT(*) FROM `bankovni racun` WHERE broj_racuna = ?";
+            PreparedStatement checkStmt = conn.prepareStatement(checkAccountQuery);
+            checkStmt.setString(1, fromAccount);
+            ResultSet rs = checkStmt.executeQuery();
+            if (!rs.next() || rs.getInt(1) == 0) {
+                throw new SQLException("Račun pošiljaoca ne postoji: " + fromAccount);
+            }
+            checkStmt.setString(1, toAccount);
+            rs = checkStmt.executeQuery();
+            if (!rs.next() || rs.getInt(1) == 0) {
+                throw new SQLException("Račun primaoca ne postoji: " + toAccount);
+            }
+            rs.close();
+            checkStmt.close();
+
+            String queryFrom = "UPDATE `bankovni racun` SET stanje = stanje - ? WHERE broj_racuna = ?";
+            stmtFrom = conn.prepareStatement(queryFrom);
+            stmtFrom.setDouble(1, amount);
+            stmtFrom.setString(2, fromAccount);
+            int rowsAffectedFrom = stmtFrom.executeUpdate();
+            if (rowsAffectedFrom == 0) {
+                throw new SQLException("Ažuriranje stanja pošiljaoca nije uspjelo za račun: " + fromAccount);
+            }
+
+            String queryTo = "UPDATE `bankovni racun` SET stanje = stanje + ? WHERE broj_racuna = ?";
+            stmtTo = conn.prepareStatement(queryTo);
+            stmtTo.setDouble(1, amount);
+            stmtTo.setString(2, toAccount);
+            int rowsAffectedTo = stmtTo.executeUpdate();
+            if (rowsAffectedTo == 0) {
+                throw new SQLException("Ažuriranje stanja primaoca nije uspjelo za račun: " + toAccount);
+            }
+
+            conn.commit();
+            System.out.println("Transfer uspješan: " + amount + " KM sa računa " + fromAccount + " na račun " + toAccount);
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                    System.out.println("Transakcija poništena zbog greške: " + e.getMessage());
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.printStackTrace();
+                }
+            }
+            throw e;
+        } finally {
+            if (stmtFrom != null) stmtFrom.close();
+            if (stmtTo != null) stmtTo.close();
+            if (conn != null) conn.close();
+        }
+    }
+
     public static void updateClientBalance(String accountNumber, double newBalance) throws SQLException {
         Connection conn = null;
         PreparedStatement stmt = null;

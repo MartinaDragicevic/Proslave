@@ -2,12 +2,12 @@ package project.proslave;
 
 import Database.Database;
 import SistemZaPlaniranjeProslava.Client;
-import SistemZaPlaniranjeProslava.Venue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -15,7 +15,6 @@ import javafx.stage.Stage;
 import SistemZaPlaniranjeProslava.Celebration;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +39,11 @@ public class ClientReservedVenues {
                 }
             }
         } else {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Greška");
+            alert.setHeaderText(null);
+            alert.setContentText("Korisnik nije prijavljen.");
+            alert.showAndWait();
             return;
         }
         active.setOnMouseClicked(this::handleCelebrationClick);
@@ -56,13 +60,18 @@ public class ClientReservedVenues {
         Database.celebrations = Database.retrieveDataFromTable("proslava", Celebration.class);
 
         for (Celebration reservation : Database.celebrations) {
+            if (reservation.getKlijent().getId() != clientId) {
+                continue;
+            }
             String reservationInfo = String.format("Objekat: %s, Datum: %s, Gosti: %d, Cijena: %.2f",
                     reservation.getObjekat().getNaziv(),
                     reservation.getDatum().toString(),
                     reservation.getBrojGostiju(),
                     reservation.getUkupnaCijena());
 
-            if (reservation.getDatum().isBefore(today)) {
+            if (reservation.getProslavacol().equals("OTKAZANA")) {
+                canceledList.add(reservationInfo);
+            } else if (reservation.getDatum().isBefore(today)) {
                 previousList.add(reservationInfo);
             } else {
                 activeList.add(reservationInfo);
@@ -100,14 +109,27 @@ public class ClientReservedVenues {
                         if (celebration != null && celebration.getKlijent().getId() == clientId) {
                             openEditVenue(event, celebration);
                         } else {
-                            System.out.println("Celebration not found for line: " + selectedLine);
+                            Alert alert = new Alert(Alert.AlertType.ERROR);
+                            alert.setTitle("Greška");
+                            alert.setHeaderText(null);
+                            alert.setContentText("Proslava nije pronađena ili ne pripada trenutnom klijentu.");
+                            alert.showAndWait();
                         }
                     }
                 } catch (IOException e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Greška");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Greška prilikom otvaranja proslave: " + e.getMessage());
+                    alert.showAndWait();
                     e.printStackTrace();
                 }
             } else {
-                System.out.println("No text selected for double click.");
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Upozorenje");
+                alert.setHeaderText(null);
+                alert.setContentText("Nije odabran tekst za dvostruki klik.");
+                alert.showAndWait();
             }
         }
     }
@@ -131,6 +153,10 @@ public class ClientReservedVenues {
         Parent root = loader.load();
         ClientEditVenue controller = loader.getController();
         controller.setCelebration(celebration);
+        controller.setCurrentClient(Database.clients.stream()
+                .filter(c -> c.getId() == clientId)
+                .findFirst()
+                .orElse(null));
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(root));
         stage.show();
@@ -153,23 +179,19 @@ public class ClientReservedVenues {
                     canceledCelebration.getDatum().toString(),
                     canceledCelebration.getBrojGostiju(),
                     canceledCelebration.getUkupnaCijena());
-            instance.canceled.appendText(canceledInfo + "\n");
+            String currentCanceledText = instance.canceled.getText();
+            if (!currentCanceledText.contains(canceledInfo)) {
+                if (currentCanceledText.equals("Nema otkazanih rezervacija")) {
+                    instance.canceled.setText(canceledInfo + "\n");
+                } else {
+                    instance.canceled.appendText(canceledInfo + "\n");
+                }
+            }
             String activeText = instance.active.getText();
             if (activeText.contains(canceledInfo)) {
                 instance.active.setText(activeText.replaceAll(canceledInfo + "\n", ""));
-            } else {
-                System.out.println("Celebration not found in active: " + canceledInfo);
-            }
-            Venue venue = canceledCelebration.getObjekat();
-            if (venue != null && venue.getDatumi() != null) {
-                List<LocalDate> datumi = new ArrayList<>(venue.getDatumi());
-                datumi.remove(canceledCelebration.getDatum());
-                venue.setDatumi(datumi);
-                try {
-                    String datumiString = String.join(",", datumi.stream().map(LocalDate::toString).toArray(String[]::new));
-                    Database.updateVenueDates(venue.getId(), datumiString);
-                } catch (SQLException e) {
-                    e.printStackTrace();
+                if (instance.active.getText().isEmpty()) {
+                    instance.active.setText("Nema aktivnih rezervacija");
                 }
             }
         } else {
