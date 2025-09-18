@@ -11,7 +11,7 @@
 
 <AnchorPane prefHeight="700.0" prefWidth="1200.0" styleClass="background" stylesheets="@../../css/css_file.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="project.proslave.ClientEditVenue">
     <children>
-        <Label layoutX="22.0" layoutY="15.0" onMouseClicked="#backToDashboard" prefHeight="26.0" prefWidth="61.0" styleClass="black_button" stylesheets="@../../css/css_file.css" text="← Back">
+        <Label layoutX="22.0" layoutY="15.0" onMouseClicked="#navigateToReservedVenues" prefHeight="26.0" prefWidth="61.0" styleClass="black_button" stylesheets="@../../css/css_file.css" text="← Back">
             <cursor>
                 <Cursor fx:constant="HAND" />
             </cursor>

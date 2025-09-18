@@ -12,7 +12,7 @@
 
 <AnchorPane prefHeight="700.0" prefWidth="1200.0" styleClass="background" stylesheets="@../../css/css_file.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="project.proslave.ClientCelebrationReservation">
     <children>
-        <Label layoutX="22.0" layoutY="15.0" onMouseClicked="#backToVenueList" prefHeight="26.0" prefWidth="61.0" styleClass="black_button" stylesheets="@../../css/css_file.css" text="← Back">
+        <Label layoutX="22.0" layoutY="15.0" onMouseClicked="#navigateToVenueList" prefHeight="26.0" prefWidth="61.0" styleClass="black_button" stylesheets="@../../css/css_file.css" text="← Back">
             <cursor>
                 <Cursor fx:constant="HAND" />
             </cursor>
@@ -34,7 +34,7 @@
          <font>
             <Font size="25.0" />
          </font></TextArea>
-      <Button fx:id="confirmReservation" layoutX="743.0" layoutY="536.0" mnemonicParsing="false" onAction="#handleConfirmReservation" style="-fx-background-color: green; -fx-text-fill: white;" text="Confirm Reservation">
+      <Button fx:id="confirmReservation" layoutX="743.0" layoutY="536.0" mnemonicParsing="false" onAction="#confirmCelebrationReservation" style="-fx-background-color: green; -fx-text-fill: white;" text="Confirm Reservation">
          <font>
             <Font size="18.0" />
          </font>

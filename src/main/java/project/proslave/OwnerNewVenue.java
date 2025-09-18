@@ -32,7 +32,7 @@ public class OwnerNewVenue {
 
     private int currentVlasnikId = 1;
 
-    public void addNewVenue() {
+    public void saveNewVenueToDatabase() {
         String name = venueName.getText().trim();
         String address = venueAddress.getText().trim();
         String place = venuePlace.getText().trim();
@@ -42,13 +42,13 @@ public class OwnerNewVenue {
         String price = reservationPrice.getText().trim();
         String menuInput = textArea.getText().trim();
 
-        if (hasEmptyField(name, address, place, maxSeats, seatsPerTableStr, tables, price, menuInput)) {
+        if (areAnyFieldsEmpty(name, address, place, maxSeats, seatsPerTableStr, tables, price, menuInput)) {
             showAlert(Alert.AlertType.ERROR, "Error", "Please fill out all fields!");
             return;
         }
 
-        if (!isPositiveInteger(maxSeats) || !isPositiveInteger(seatsPerTableStr)
-                || !isPositiveInteger(tables) || !isPositiveDecimal(price)) {
+        if (!validatePositiveInteger(maxSeats) || !validatePositiveInteger(seatsPerTableStr)
+                || !validatePositiveInteger(tables) || !validatePositiveDecimal(price)) {
             showAlert(Alert.AlertType.ERROR, "Error", "Ensure numeric fields contain positive numbers.");
             return;
         }
@@ -65,7 +65,7 @@ public class OwnerNewVenue {
             return;
         }
 
-        List<Menu> menus = parseMenus(menuInput);
+        List<Menu> menus = parseMenuInput(menuInput);
         if (menus.isEmpty()) {
             showAlert(Alert.AlertType.ERROR, "Error",
                     "Please provide at least one valid menu (format: description: price).");
@@ -91,7 +91,7 @@ public class OwnerNewVenue {
         }
     }
 
-    private boolean hasEmptyField(String... values) {
+    private boolean areAnyFieldsEmpty(String... values) {
         for (String v : values) {
             if (v.isEmpty()) {
                 return true;
@@ -100,14 +100,14 @@ public class OwnerNewVenue {
         return false;
     }
 
-    private boolean isPositiveInteger(String str) {
+    private boolean validatePositiveInteger(String str) {
         try {
             return Integer.parseInt(str) > 0;
         } catch (NumberFormatException e) {
             return false;
         }
     }
-    private boolean isPositiveDecimal(String str) {
+    private boolean validatePositiveDecimal(String str) {
         try {
             return Double.parseDouble(str) > 0;
         } catch (NumberFormatException e) {
@@ -115,7 +115,7 @@ public class OwnerNewVenue {
         }
     }
 
-    private List<Menu> parseMenus(String input) {
+    private List<Menu> parseMenuInput(String input) {
         List<Menu> menus = new ArrayList<>();
         for (String line : input.replace("\r\n", "\n").split("\n")) {
             String[] parts = line.trim().split(": ", 2);
@@ -154,7 +154,7 @@ public class OwnerNewVenue {
         alert.showAndWait();
     }
 
-    public void backToDashboard(MouseEvent event) throws IOException {
+    public void navigateBackToOwnerDashboard(MouseEvent event) throws IOException {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("owner_dashboard.fxml"))));
         stage.show();

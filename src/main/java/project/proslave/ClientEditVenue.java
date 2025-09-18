@@ -42,8 +42,8 @@ public class ClientEditVenue implements Initializable {
             venueName.setText("Nema dostupnih podataka o objektu");
         }
 
-        cancelReservation.setOnAction(event -> handleCancelReservation());
-        saveChanges.setOnAction(event -> handleSaveChanges());
+        cancelReservation.setOnAction(event -> cancelVenueReservation());
+        saveChanges.setOnAction(event -> saveVenueChanges());
     }
 
     public void setCelebration(Celebration celebration) {
@@ -92,7 +92,7 @@ public class ClientEditVenue implements Initializable {
         }
     }
 
-    public void handleCancelReservation() {
+    public void cancelVenueReservation() {
         if (selectedCelebration == null) {
             showAlert(Alert.AlertType.ERROR, "Greška", "Nema odabrane proslave za otkazivanje.");
             return;
@@ -146,14 +146,14 @@ public class ClientEditVenue implements Initializable {
             showAlert(Alert.AlertType.INFORMATION, "Otkazivanje rezervacije", message);
 
             ClientReservedVenues.refreshCanceled(selectedCelebration);
-            backToDashboard(null);
+            navigateToReservedVenues(null);
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Greška", "Greška prilikom otkazivanja rezervacije: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    public void handleSaveChanges() {
+    public void saveVenueChanges() {
         if (selectedCelebration == null || menuChoiceBox.getValue() == null ||
                 menuChoiceBox.getValue().equals("No menu for this venue.") ||
                 menuChoiceBox.getValue().equals("Nema dostupnih podataka o objektu")) {
@@ -172,7 +172,7 @@ public class ClientEditVenue implements Initializable {
                 Database.updateCelebrationMenu(selectedCelebration.getId(), newMenu.getId());
                 selectedCelebration.setMeni(newMenu);
                 showAlert(Alert.AlertType.INFORMATION, "Uspjeh", "Promjene uspješno sačuvane.");
-                backToDashboard(null);
+                navigateToReservedVenues(null);
             } catch (SQLException e) {
                 showAlert(Alert.AlertType.ERROR, "Greška", "Greška prilikom čuvanja promjena: " + e.getMessage());
                 e.printStackTrace();
@@ -182,7 +182,7 @@ public class ClientEditVenue implements Initializable {
         }
     }
 
-    public void backToDashboard(MouseEvent event) {
+    public void navigateToReservedVenues(MouseEvent event) {
         try {
             Stage stage = (Stage) cancelReservation.getScene().getWindow();
             stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("client_reservedVenues.fxml"))));

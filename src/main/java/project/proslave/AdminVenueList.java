@@ -30,9 +30,9 @@ public class AdminVenueList implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupVenueTextArea();
-        refreshVenueTextArea();
-        acceptButton.setOnAction(e -> handleAccept());
-        declineButton.setOnAction(e -> handleDecline());
+        updateVenueListDisplay();
+        acceptButton.setOnAction(e -> approveSelectedVenue());
+        declineButton.setOnAction(e -> declineSelectedVenue());
     }
 
     private void setupVenueTextArea() {
@@ -41,7 +41,7 @@ public class AdminVenueList implements Initializable {
         venueTextArea.setOnMouseClicked(this::handleVenueSelection);
     }
 
-    private void refreshVenueTextArea() {
+    private void updateVenueListDisplay() {
         StringBuilder builder = new StringBuilder();
 
         Database.venues.stream()
@@ -78,7 +78,7 @@ public class AdminVenueList implements Initializable {
 
         try {
             selectedVenueId = Integer.parseInt(selectedLine.split(",")[0].replace("ID:", "").trim());
-            showVenueMenus();
+            displayVenueMenus();
             highlightSelectedLine(lines, selectedLine);
         } catch (Exception ex) {
             selectedVenueId = -1;
@@ -86,7 +86,7 @@ public class AdminVenueList implements Initializable {
         }
     }
 
-    private void showVenueMenus() {
+    private void displayVenueMenus() {
         StringBuilder menus = new StringBuilder();
         for (Menu menu : Database.menus) {
             if (menu.getObjekat() != null && menu.getObjekat().getId() == selectedVenueId) {
@@ -104,11 +104,11 @@ public class AdminVenueList implements Initializable {
         venueTextArea.selectRange(pos, pos + selectedLine.length());
     }
 
-    private void handleAccept() {
+    private void approveSelectedVenue() {
         try {
             Database.updateVenueStatus(selectedVenueId, "ODOBREN");
             Database.venues = Database.retrieveDataFromTable("objekat", Venue.class);
-            refreshVenueTextArea();
+            updateVenueListDisplay();
             showAlert(Alert.AlertType.INFORMATION, "Success", "Venue Accepted.");
             selectedVenueId = -1;
             venueTextArea.deselect();
@@ -117,7 +117,7 @@ public class AdminVenueList implements Initializable {
         }
     }
 
-    private void handleDecline() {
+    private void declineSelectedVenue() {
         if (selectedVenueId == -1) {
             showAlert(Alert.AlertType.WARNING, "Warning", "No venue is selected.");
             return;
@@ -162,7 +162,7 @@ public class AdminVenueList implements Initializable {
             Database.updateVenueStatus(selectedVenueId, "ODBIJEN");
             Database.addDeclineTextNotification(selectedVenueId, reason);
             Database.venues = Database.retrieveDataFromTable("objekat", Venue.class);
-            refreshVenueTextArea();
+            updateVenueListDisplay();
             showAlert(Alert.AlertType.INFORMATION, "Success", "Venue declined.");
             selectedVenueId = -1;
             venueTextArea.deselect();
@@ -179,7 +179,7 @@ public class AdminVenueList implements Initializable {
         alert.showAndWait();
     }
 
-    public void backToDashboard(MouseEvent event) throws IOException {
+    public void navigateToDashboard(MouseEvent event) throws IOException {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         Scene newScene = new Scene(FXMLLoader.load(getClass().getResource("admin_dashboard.fxml")));
         stage.setScene(newScene);

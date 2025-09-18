@@ -31,11 +31,11 @@ public class ClientVenueList implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        refreshVenueTextArea();
-        venueTextArea.setOnMouseClicked(this::handleVenueSelection);
+        updateVenueListDisplay();
+        venueTextArea.setOnMouseClicked(this::onVenueSelected);
     }
 
-    private void refreshVenueTextArea() {
+    private void updateVenueListDisplay() {
         List<Venue> sortedVenues = new ArrayList<>();
         for (Venue venue : Database.venues) {
             if ("ODOBREN".equals(venue.getStatus())) {
@@ -56,7 +56,7 @@ public class ClientVenueList implements Initializable {
         venueTextArea.setText(venuesText.toString());
     }
 
-    public void searchFilters() {
+    public void applyVenueFilters() {
         String city = cityFilter.getText().trim().toLowerCase();
         LocalDate date = dateFilter.getValue();
         String seatsText = seatsFilter.getText().trim();
@@ -95,7 +95,7 @@ public class ClientVenueList implements Initializable {
         venueTextArea.setText(venuesText.toString());
     }
 
-    private void handleVenueSelection(MouseEvent event) {
+    private void onVenueSelected(MouseEvent event) {
         String selectedText = venueTextArea.getSelectedText();
         if (selectedText != null && selectedText.contains("ID:")) {
             try {
@@ -118,10 +118,10 @@ public class ClientVenueList implements Initializable {
         cityFilter.clear();
         dateFilter.setValue(null);
         seatsFilter.clear();
-        refreshVenueTextArea();
+        updateVenueListDisplay();
     }
 
-    public void backToDashboard(MouseEvent event) throws IOException {
+    public void navigateToClientDashboard(MouseEvent event) throws IOException {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("client_dashboard.fxml"))));
         stage.show();

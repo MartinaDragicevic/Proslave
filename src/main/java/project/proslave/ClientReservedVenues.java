@@ -48,8 +48,8 @@ public class ClientReservedVenues {
             return;
         }
 
-        active.setOnMouseClicked(this::handleCelebrationClick);
-        previous.setOnMouseClicked(this::handleCelebrationClick);
+        active.setOnMouseClicked(this::onCelebrationDoubleClick);
+        previous.setOnMouseClicked(this::onCelebrationDoubleClick);
         loadReservations();
     }
 
@@ -84,29 +84,29 @@ public class ClientReservedVenues {
         canceled.setText(canceledList.isEmpty() ? "Nema otkazanih rezervacija" : String.join("\n", canceledList));
     }
 
-    public void handleCelebrationClick(MouseEvent event) {
+    public void onCelebrationDoubleClick(MouseEvent event) {
         if (event.getButton() != MouseButton.PRIMARY || event.getClickCount() != 2){
             return;
         }
 
         TextArea source = (TextArea) event.getSource();
-        String selectedLine = getSelectedLine(source);
+        String selectedLine = extractSelectedLine(source);
 
-        Celebration celebration = findCelebrationByLine(selectedLine);
+        Celebration celebration = matchCelebrationFromLine(selectedLine);
         if (celebration == null || celebration.getKlijent().getId() != clientId) {
             showAlert(Alert.AlertType.ERROR, "Greška", "Proslava nije pronađena.");
             return;
         }
 
         try {
-            openEditVenue(event, celebration);
+            openVenueEditScene(event, celebration);
         } catch (IOException e) {
             showAlert(Alert.AlertType.ERROR, "Greška", "Greška prilikom otvaranja proslave: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    private String getSelectedLine(TextArea source) {
+    private String extractSelectedLine(TextArea source) {
         int caretPosition = source.getCaretPosition();
         String[] lines = source.getText().split("\n");
         int currentPos = 0;
@@ -119,7 +119,7 @@ public class ClientReservedVenues {
         return null;
     }
 
-    private Celebration findCelebrationByLine(String line) {
+    private Celebration matchCelebrationFromLine(String line) {
         for (Celebration celebration : Database.celebrations) {
             String reservationInfo = String.format("Objekat: %s, Datum: %s, Gosti: %d, Cijena: %.2f",
                     celebration.getObjekat().getNaziv(),
@@ -131,7 +131,7 @@ public class ClientReservedVenues {
         return null;
     }
 
-    private void openEditVenue(MouseEvent event, Celebration celebration) throws IOException {
+    private void openVenueEditScene(MouseEvent event, Celebration celebration) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("client_editVenue.fxml"));
         Parent root = loader.load();
         ClientEditVenue controller = loader.getController();
@@ -149,13 +149,13 @@ public class ClientReservedVenues {
         this.clientId = clientId;
     }
 
-    public void backToDashboard(MouseEvent event) throws IOException {
+    public void navigateToClientDashboard(MouseEvent event) throws IOException {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("client_dashboard.fxml"))));
         stage.show();
     }
 
-    public static void refreshCanceled(Celebration canceledCelebration) {
+    public static void updateCanceledReservations(Celebration canceledCelebration) {
         if (instance == null || instance.canceled == null || instance.active == null) return;
 
         Platform.runLater(() -> {

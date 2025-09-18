@@ -35,12 +35,12 @@ public class ClientCelebrationReservation implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        refreshVenueTextArea();
+        displaySelectedVenueDetails();
         handleVenueMenu();
-        confirmReservation.setOnAction(event -> handleConfirmReservation());
+        confirmReservation.setOnAction(event -> confirmCelebrationReservation());
     }
 
-    private void refreshVenueTextArea() {
+    private void displaySelectedVenueDetails() {
         int selectedId = ClientVenueList.selectedVenueId;
 
         Venue selectedVenue = Database.venues.stream()
@@ -97,13 +97,13 @@ public class ClientCelebrationReservation implements Initializable {
         }
     }
 
-    public void backToVenueList(MouseEvent event) throws IOException {
+    public void navigateToVenueList(MouseEvent event) throws IOException {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("client_venueList.fxml"))));
         stage.show();
     }
 
-    public void handleConfirmReservation() {
+    public void confirmCelebrationReservation() {
         LocalDate selectedDate = celebrationDatePicker.getValue();
         int selectedVenueId = ClientVenueList.selectedVenueId;
         String selectedMenu = menuChoiceBox.getSelectionModel().getSelectedItem();

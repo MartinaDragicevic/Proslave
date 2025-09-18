@@ -38,11 +38,11 @@ public class OwnerVenueList implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Database.loadNotifications();
-        configureTextAreas();
-        refreshVenueTextArea();
+        setupTextAreas();
+        updateVenueListDisplay();
     }
 
-    private void configureTextAreas() {
+    private void setupTextAreas() {
         venueTextArea.setEditable(false);
         activeCelebrations.setEditable(false);
         previousCelebration.setEditable(false);
@@ -51,12 +51,12 @@ public class OwnerVenueList implements Initializable {
         venueTextArea.setCursor(Cursor.HAND);
         venueTextArea.setStyle("-fx-text-fill: black;");
 
-        venueTextArea.setOnMouseClicked(this::handleVenueSelection);
-        activeCelebrations.setOnMouseClicked(this::handleCelebrationSelection);
-        previousCelebration.setOnMouseClicked(this::handleCelebrationSelection);
+        venueTextArea.setOnMouseClicked(this::onVenueSelected);
+        activeCelebrations.setOnMouseClicked(this::onCelebrationSelected);
+        previousCelebration.setOnMouseClicked(this::onCelebrationSelected);
     }
 
-    private void refreshVenueTextArea() {
+    private void updateVenueListDisplay() {
         String venuesText = Database.venues.isEmpty()
                 ? "There are no available venues."
                 : Database.venues.stream()
@@ -68,27 +68,27 @@ public class OwnerVenueList implements Initializable {
         venueTextArea.setText(venuesText);
     }
 
-    private void handleVenueSelection(MouseEvent event) {
+    private void onVenueSelected(MouseEvent event) {
         if (event.getButton() != MouseButton.PRIMARY || event.getClickCount() != 1){
             return;
         }
 
-        String selectedLine = getSelectedLine(event.getSource(), venueTextArea.getCaretPosition());
+        String selectedLine = extractSelectedVenueLine(event.getSource(), venueTextArea.getCaretPosition());
         if (selectedLine == null) {
-            clearDetails();
+            clearVenueDetails();
             return;
         }
 
         try {
             selectedVenueId = Integer.parseInt(selectedLine.split(",")[0].replace("ID: ", "").trim());
             selectedCelebrationId = -1;
-            updateVenueDetails();
+            displayVenueDetails();
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            clearDetails();
+            clearVenueDetails();
         }
     }
 
-    private String getSelectedLine(Object source, int caretPosition) {
+    private String extractSelectedVenueLine(Object source, int caretPosition) {
         String[] lines = venueTextArea.getText().split("\n");
         int currentPos = 0;
         for (String line : lines) {
@@ -101,28 +101,28 @@ public class OwnerVenueList implements Initializable {
         return null;
     }
 
-    private void updateVenueDetails() {
+    private void displayVenueDetails() {
         Venue venue = Database.venues.stream()
                 .filter(v -> v.getId() == selectedVenueId)
                 .findFirst().orElse(null);
 
         if (venue == null) {
-            clearDetails();
+            clearVenueDetails();
             return;
         }
 
-        earnedMoney.setText(String.format("$%.2f", calculateEarnings(selectedVenueId)));
-        updateCelebrations();
+        earnedMoney.setText(String.format("$%.2f", calculateVenueEarnings(selectedVenueId)));
+        displayVenueCelebrations();
     }
 
-    private double calculateEarnings(int venueId) {
+    private double calculateVenueEarnings(int venueId) {
         return Database.celebrations.stream()
                 .filter(c -> c.getObjekat().getId() == venueId && c.getUplacenIznos() > 0)
                 .mapToDouble(Celebration::getUplacenIznos)
                 .sum();
     }
 
-    private void updateCelebrations() {
+    private void displayVenueCelebrations() {
         LocalDate today = LocalDate.now();
         List<Celebration> celebrations = Database.celebrations.stream()
                 .filter(c -> c.getObjekat().getId() == selectedVenueId)
@@ -130,12 +130,12 @@ public class OwnerVenueList implements Initializable {
 
         activeCelebrations.setText(celebrations.stream()
                 .filter(c -> c.getDatum().isAfter(today))
-                .map(this::formatCelebration)
+                .map(this::formatCelebrationDetails)
                 .collect(Collectors.joining("\n")));
 
         previousCelebration.setText(celebrations.stream()
                 .filter(c -> c.getDatum().isBefore(today))
-                .map(this::formatCelebration)
+                .map(this::formatCelebrationDetails)
                 .collect(Collectors.joining("\n")));
 
         aboutCelebration.setText(celebrations.isEmpty()
@@ -143,13 +143,13 @@ public class OwnerVenueList implements Initializable {
                 : "Click a celebration for details.");
     }
 
-    private String formatCelebration(Celebration c) {
+    private String formatCelebrationDetails(Celebration c) {
         return String.format("ID: %d, Date: %s, Guests: %d, Price: $%.2f, Paid: $%.2f",
                 c.getId(), c.getDatum(), c.getBrojGostiju(),
                 c.getUkupnaCijena(), c.getUplacenIznos());
     }
 
-    private void handleCelebrationSelection(MouseEvent event) {
+    private void onCelebrationSelected(MouseEvent event) {
         if (event.getButton() != MouseButton.PRIMARY) return;
 
         TextArea source = (TextArea) event.getSource();
@@ -178,7 +178,7 @@ public class OwnerVenueList implements Initializable {
         }
     }
 
-    private void clearDetails() {
+    private void clearVenueDetails() {
         earnedMoney.setText("$0.00");
         activeCelebrations.clear();
         previousCelebration.clear();
@@ -187,7 +187,7 @@ public class OwnerVenueList implements Initializable {
         selectedCelebrationId = -1;
     }
 
-    public void backToDashboard(MouseEvent event) throws IOException {
+    public void navigateToOwnerDashboard(MouseEvent event) throws IOException {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("owner_dashboard.fxml"))));
         stage.show();

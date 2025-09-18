@@ -12,7 +12,7 @@
 
 <AnchorPane prefHeight="700.0" prefWidth="1200.0" styleClass="background" stylesheets="@../../css/css_file.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="project.proslave.ClientVenueList">
     <children>
-        <Label layoutX="22.0" layoutY="15.0" onMouseClicked="#backToDashboard" prefHeight="26.0" prefWidth="61.0" styleClass="black_button" stylesheets="@../../css/css_file.css" text="← Back">
+        <Label layoutX="22.0" layoutY="15.0" onMouseClicked="#navigateToClientDashboard" prefHeight="26.0" prefWidth="61.0" styleClass="black_button" stylesheets="@../../css/css_file.css" text="← Back">
             <cursor>
                 <Cursor fx:constant="HAND" />
             </cursor>
@@ -34,7 +34,7 @@
          <font>
             <Font size="18.0" />
          </font></TextArea>
-      <Button layoutX="766.0" layoutY="369.0" mnemonicParsing="false" onAction="#searchFilters" style="-fx-background-color: green; -fx-text-fill: white;" text="Search Venues">
+      <Button layoutX="766.0" layoutY="369.0" mnemonicParsing="false" onAction="#applyVenueFilters" style="-fx-background-color: green; -fx-text-fill: white;" text="Search Venues">
          <font>
             <Font size="18.0" />
          </font>
