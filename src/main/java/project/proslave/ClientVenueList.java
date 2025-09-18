@@ -13,6 +13,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+
 import java.time.LocalDate;
 import java.io.IOException;
 import java.net.URL;
@@ -35,24 +36,21 @@ public class ClientVenueList implements Initializable {
     }
 
     private void refreshVenueTextArea() {
-        StringBuilder venuesText = new StringBuilder();
-
         List<Venue> sortedVenues = new ArrayList<>();
         for (Venue venue : Database.venues) {
-            if (venue.getStatus().equals("ODOBREN")) {
+            if ("ODOBREN".equals(venue.getStatus())) {
                 sortedVenues.add(venue);
             }
         }
         sortedVenues.sort(Comparator.comparing(Venue::getNaziv, String.CASE_INSENSITIVE_ORDER));
 
+        StringBuilder venuesText = new StringBuilder();
         if (sortedVenues.isEmpty()) {
             venuesText.append("No available venues.");
         } else {
             for (Venue venue : sortedVenues) {
-                venuesText.append("ID: ").append(venue.getId())
-                        .append(", Name: ").append(venue.getNaziv())
-                        .append(", City: ").append(venue.getGrad())
-                        .append("\n");
+                venuesText.append(String.format("ID: %d, Name: %s, City: %s%n",
+                        venue.getId(), venue.getNaziv(), venue.getGrad()));
             }
         }
         venueTextArea.setText(venuesText.toString());
@@ -68,11 +66,7 @@ public class ClientVenueList implements Initializable {
             try {
                 seats = Integer.parseInt(seatsText);
             } catch (NumberFormatException e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText(null);
-                alert.setContentText("Number of seats must be digit.");
-                alert.showAndWait();
+                showAlert("Error", "Number of seats must be a valid integer.");
                 return;
             }
         }
@@ -81,23 +75,15 @@ public class ClientVenueList implements Initializable {
         boolean anyMatch = false;
 
         for (Venue venue : Database.venues) {
-            if (!venue.getStatus().equals("ODOBREN"))
-                continue;
+            if (!"ODOBREN".equals(venue.getStatus())) continue;
 
             boolean cityMatch = city.isEmpty() || venue.getGrad().toLowerCase().contains(city);
             boolean seatsMatch = (seats == -1) || (venue.getBrojMjesta() >= seats);
-
-            boolean dateMatch = true;
-            if (date != null) {
-                dateMatch = venue.getDatumi() != null && venue.getDatumi().contains(date);
-            }
+            boolean dateMatch = (date == null) || (venue.getDatumi() != null && venue.getDatumi().contains(date));
 
             if (cityMatch && seatsMatch && dateMatch) {
-                venuesText.append("ID: ").append(venue.getId())
-                        .append(", Name: ").append(venue.getNaziv())
-                        .append(", City: ").append(venue.getGrad())
-                        .append(", Max Seats: ").append(venue.getBrojMjesta())
-                        .append("\n");
+                venuesText.append(String.format("ID: %d, Name: %s, City: %s, Max Seats: %d%n",
+                        venue.getId(), venue.getNaziv(), venue.getGrad(), venue.getBrojMjesta()));
                 anyMatch = true;
             }
         }
@@ -111,19 +97,19 @@ public class ClientVenueList implements Initializable {
 
     private void handleVenueSelection(MouseEvent event) {
         String selectedText = venueTextArea.getSelectedText();
-
         if (selectedText != null && selectedText.contains("ID:")) {
             try {
                 int idStart = selectedText.indexOf("ID:") + 4;
                 int idEnd = selectedText.indexOf(",", idStart);
-                selectedVenueId = Integer.parseInt(selectedText.substring(idStart, idEnd));
+                if (idEnd == -1) idEnd = selectedText.length();
+                selectedVenueId = Integer.parseInt(selectedText.substring(idStart, idEnd).trim());
 
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("client_celebrationReservation.fxml"));
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 stage.setScene(new Scene(loader.load()));
                 stage.show();
             } catch (Exception e) {
-                System.out.println("Greška pri parsiranju ID-a.");
+                System.out.println("Error parsing venue ID: " + e.getMessage());
             }
         }
     }
@@ -139,5 +125,13 @@ public class ClientVenueList implements Initializable {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("client_dashboard.fxml"))));
         stage.show();
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

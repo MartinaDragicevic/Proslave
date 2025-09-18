@@ -31,90 +31,88 @@ public class OwnerVenueList implements Initializable {
     @FXML private Text earnedMoney;
     @FXML private TextArea previousCelebration;
     @FXML private TextArea venueTextArea;
+
     private int selectedVenueId = -1;
     private int selectedCelebrationId = -1;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Database.loadNotifications();
+        configureTextAreas();
+        refreshVenueTextArea();
+    }
+
+    private void configureTextAreas() {
         venueTextArea.setEditable(false);
         activeCelebrations.setEditable(false);
         previousCelebration.setEditable(false);
         aboutCelebration.setEditable(false);
+
         venueTextArea.setCursor(Cursor.HAND);
         venueTextArea.setStyle("-fx-text-fill: black;");
+
         venueTextArea.setOnMouseClicked(this::handleVenueSelection);
         activeCelebrations.setOnMouseClicked(this::handleCelebrationSelection);
         previousCelebration.setOnMouseClicked(this::handleCelebrationSelection);
-        refreshVenueTextArea();
     }
 
     private void refreshVenueTextArea() {
-        StringBuilder venuesText = new StringBuilder();
-        if (Database.venues.isEmpty()) {
-            venuesText.append("There are no available venues.");
-        } else {
-            for (Venue venue : Database.venues) {
-                if (venue.getStatus().equals("ODOBREN")) {
-                    venuesText.append("ID: ").append(venue.getId())
-                            .append(", Name: ").append(venue.getNaziv())
-                            .append(", City: ").append(venue.getGrad())
-                            .append(", Address: ").append(venue.getAdresa())
-                            .append("\n");
-                }
-            }
-        }
-        venueTextArea.setText(venuesText.toString());
+        String venuesText = Database.venues.isEmpty()
+                ? "There are no available venues."
+                : Database.venues.stream()
+                .filter(v -> v.getStatus().equals("ODOBREN"))
+                .map(v -> String.format("ID: %d, Name: %s, City: %s, Address: %s",
+                        v.getId(), v.getNaziv(), v.getGrad(), v.getAdresa()))
+                .collect(Collectors.joining("\n"));
+
+        venueTextArea.setText(venuesText);
     }
 
     private void handleVenueSelection(MouseEvent event) {
-        if (event.getClickCount() != 1 || event.getButton() != MouseButton.PRIMARY) {
+        if (event.getButton() != MouseButton.PRIMARY || event.getClickCount() != 1){
             return;
         }
 
-        int caretPosition = venueTextArea.getCaretPosition();
-        String text = venueTextArea.getText();
-        String[] lines = text.split("\n");
-        int currentPos = 0;
-        String selectedLine = null;
-        int lineStart = 0;
-        int lineEnd = 0;
-        for (String line : lines) {
-            lineStart = currentPos;
-            lineEnd = currentPos + line.length() + 1;
-            if (caretPosition >= lineStart && caretPosition <= lineEnd) {
-                selectedLine = line.trim();
-                break;
-            }
-            currentPos = lineEnd;
+        String selectedLine = getSelectedLine(event.getSource(), venueTextArea.getCaretPosition());
+        if (selectedLine == null) {
+            clearDetails();
+            return;
         }
 
         try {
-            String idPart = selectedLine.split(",")[0].trim();
-            selectedVenueId = Integer.parseInt(idPart.replace("ID: ", "").trim());
+            selectedVenueId = Integer.parseInt(selectedLine.split(",")[0].replace("ID: ", "").trim());
             selectedCelebrationId = -1;
             updateVenueDetails();
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            venueTextArea.deselect();
-            selectedVenueId = -1;
             clearDetails();
         }
     }
 
-    private void updateVenueDetails() {
-        if (selectedVenueId != -1) {
-            Venue venue = Database.venues.stream()
-                    .filter(v -> v.getId() == selectedVenueId)
-                    .findFirst().orElse(null);
-            if (venue != null) {
-                String datesText = venue.getDatumi() != null ? "Booked: " + String.join(", ", venue.getDatumi().stream().map(LocalDate::toString).toArray(String[]::new)) : "All dates available";
-                double earnings = calculateEarnings(selectedVenueId);
-                earnedMoney.setText(String.format("$%.2f", earnings));
-                updateCelebrations();
-            } else {
-                clearDetails();
+    private String getSelectedLine(Object source, int caretPosition) {
+        String[] lines = venueTextArea.getText().split("\n");
+        int currentPos = 0;
+        for (String line : lines) {
+            int lineEnd = currentPos + line.length() + 1;
+            if (caretPosition >= currentPos && caretPosition <= lineEnd) {
+                return line.trim();
             }
+            currentPos = lineEnd;
         }
+        return null;
+    }
+
+    private void updateVenueDetails() {
+        Venue venue = Database.venues.stream()
+                .filter(v -> v.getId() == selectedVenueId)
+                .findFirst().orElse(null);
+
+        if (venue == null) {
+            clearDetails();
+            return;
+        }
+
+        earnedMoney.setText(String.format("$%.2f", calculateEarnings(selectedVenueId)));
+        updateCelebrations();
     }
 
     private double calculateEarnings(int venueId) {
@@ -125,62 +123,66 @@ public class OwnerVenueList implements Initializable {
     }
 
     private void updateCelebrations() {
-        if (selectedVenueId != -1) {
-            LocalDate currentDate = LocalDate.now();
-            List<Celebration> allCelebrations = Database.celebrations.stream()
-                    .filter(c -> c.getObjekat().getId() == selectedVenueId)
-                    .collect(Collectors.toList());
-            activeCelebrations.setText(allCelebrations.stream()
-                    .filter(c -> c.getDatum().isAfter(currentDate))
-                    .map(c -> String.format("ID: %d, Date: %s, Guests: %d, Price: $%.2f, Paid: $%.2f",
-                            c.getId(), c.getDatum(), c.getBrojGostiju(),
-                            c.getUkupnaCijena(), c.getUplacenIznos()))
-                    .collect(Collectors.joining("\n")));
-            previousCelebration.setText(allCelebrations.stream()
-                    .filter(c -> c.getDatum().isBefore(currentDate))
-                    .map(c -> String.format("ID: %d, Date: %s, Guests: %d, Price: $%.2f, Paid: $%.2f",
-                            c.getId(), c.getDatum(), c.getBrojGostiju(),
-                            c.getUkupnaCijena(), c.getUplacenIznos()))
-                    .collect(Collectors.joining("\n")));
-            aboutCelebration.setText(allCelebrations.isEmpty() ? "No celebrations for this venue." : "Click a celebration for details.");
-        }
+        LocalDate today = LocalDate.now();
+        List<Celebration> celebrations = Database.celebrations.stream()
+                .filter(c -> c.getObjekat().getId() == selectedVenueId)
+                .collect(Collectors.toList());
+
+        activeCelebrations.setText(celebrations.stream()
+                .filter(c -> c.getDatum().isAfter(today))
+                .map(this::formatCelebration)
+                .collect(Collectors.joining("\n")));
+
+        previousCelebration.setText(celebrations.stream()
+                .filter(c -> c.getDatum().isBefore(today))
+                .map(this::formatCelebration)
+                .collect(Collectors.joining("\n")));
+
+        aboutCelebration.setText(celebrations.isEmpty()
+                ? "No celebrations for this venue."
+                : "Click a celebration for details.");
+    }
+
+    private String formatCelebration(Celebration c) {
+        return String.format("ID: %d, Date: %s, Guests: %d, Price: $%.2f, Paid: $%.2f",
+                c.getId(), c.getDatum(), c.getBrojGostiju(),
+                c.getUkupnaCijena(), c.getUplacenIznos());
     }
 
     private void handleCelebrationSelection(MouseEvent event) {
-        if (event.getButton() == MouseButton.PRIMARY) {
-            TextArea source = (TextArea) event.getSource();
-            String selectedText = source.getSelectedText();
-            if (selectedText != null && !selectedText.isEmpty()) {
-                try {
-                    int celebrationId = Integer.parseInt(selectedText.split(",")[0].replace("ID: ", "").trim());
-                    Celebration celebration = Database.celebrations.stream()
-                            .filter(c -> c.getId() == celebrationId)
-                            .findFirst().orElse(null);
-                    if (celebration != null) {
-                        selectedCelebrationId = celebrationId;
-                        Menu menu = celebration.getMeni();
-                        aboutCelebration.setText(String.format(
-                                "Date: %s\n" +
-                                "Guests: %d\n" +
-                                "Price: $%.2f\n" +
-                                "Menu: %s\n",
-                                celebration.getDatum(),
-                                celebration.getBrojGostiju(),
-                                celebration.getUplacenIznos(),
-                                menu != null ? menu.getOpis() : "No menu"));
-                    }
-                } catch (NumberFormatException e) {
-                    aboutCelebration.setText("Invalid selection.");
-                }
+        if (event.getButton() != MouseButton.PRIMARY) return;
+
+        TextArea source = (TextArea) event.getSource();
+        String selectedText = source.getSelectedText();
+
+        if (selectedText == null || selectedText.isEmpty()) return;
+
+        try {
+            int celebrationId = Integer.parseInt(selectedText.split(",")[0].replace("ID: ", "").trim());
+            Celebration celebration = Database.celebrations.stream()
+                    .filter(c -> c.getId() == celebrationId)
+                    .findFirst().orElse(null);
+
+            if (celebration != null) {
+                selectedCelebrationId = celebrationId;
+                Menu menu = celebration.getMeni();
+                aboutCelebration.setText(String.format(
+                        "Date: %s\nGuests: %d\nPrice: $%.2f\nMenu: %s\n",
+                        celebration.getDatum(),
+                        celebration.getBrojGostiju(),
+                        celebration.getUplacenIznos(),
+                        menu != null ? menu.getOpis() : "No menu"));
             }
+        } catch (NumberFormatException e) {
+            aboutCelebration.setText("Invalid selection.");
         }
     }
 
     private void clearDetails() {
         earnedMoney.setText("$0.00");
-        activeCelebrations.setText("");
-        previousCelebration.setText("");
-        aboutCelebration.setText("");
+        activeCelebrations.clear();
+        previousCelebration.clear();
+        aboutCelebration.clear();
         selectedVenueId = -1;
         selectedCelebrationId = -1;
     }

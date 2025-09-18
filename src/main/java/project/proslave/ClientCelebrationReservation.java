@@ -14,9 +14,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
-import javafx.scene.control.ChoiceBox;
+
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -42,23 +43,30 @@ public class ClientCelebrationReservation implements Initializable {
     private void refreshVenueTextArea() {
         int selectedId = ClientVenueList.selectedVenueId;
 
-        for (Venue venue : Database.venues) {
-            if (venue.getId() == selectedId) {
-                StringBuilder venuesText = new StringBuilder();
-                venuesText.append("Name: ").append(venue.getNaziv()).append("\n")
-                        .append("City: ").append(venue.getGrad()).append("\n")
-                        .append("Address: ").append(venue.getAdresa()).append("\n")
-                        .append("Max Seats: ").append(venue.getBrojMjesta()).append("\n")
-                        .append("Table number: ").append(venue.getBrojStolova()).append("\n")
-                        .append("Price: ").append(venue.getCijenaRezervacije()).append("\n")
-                        .append("Available dates: ").append(venue.getDatumi() != null ?
-                                "Booked dates: " + venue.getDatumi().stream().map(LocalDate::toString).collect(Collectors.joining(", ")) : "All dates available");
-                venueTextArea.setText(venuesText.toString());
-                return;
-            }
-        }
+        Venue selectedVenue = Database.venues.stream()
+                .filter(v -> v.getId() == selectedId)
+                .findFirst().orElse(null);
 
-        venueTextArea.setText("Error: can't find venue.");
+        if (selectedVenue != null) {
+            String availableDates = selectedVenue.getDatumi() != null && !selectedVenue.getDatumi().isEmpty()
+                    ? selectedVenue.getDatumi().stream().map(LocalDate::toString).collect(Collectors.joining(", "))
+                    : "All dates available";
+
+            String venueInfo = String.format(
+                    "Name: %s\nCity: %s\nAddress: %s\nMax Seats: %d\nTable number: %d\nPrice: %.2f\nAvailable dates: %s",
+                    selectedVenue.getNaziv(),
+                    selectedVenue.getGrad(),
+                    selectedVenue.getAdresa(),
+                    selectedVenue.getBrojMjesta(),
+                    selectedVenue.getBrojStolova(),
+                    selectedVenue.getCijenaRezervacije(),
+                    availableDates
+            );
+
+            venueTextArea.setText(venueInfo);
+        } else {
+            venueTextArea.setText("Error: can't find venue.");
+        }
     }
 
     private void handleVenueMenu() {
@@ -70,12 +78,11 @@ public class ClientCelebrationReservation implements Initializable {
                 .findFirst().orElse(null);
 
         if (selectedVenue != null) {
-            for (Menu menu : Database.menus) {
-                if (menu.getObjekat() != null && menu.getObjekat().getId() == selectedId) {
-                    String menuEntry = "Description: " + menu.getOpis() + " | Price: " + menu.getCijenaPoOsobi() + " KM";
-                    menuChoiceBox.getItems().add(menuEntry);
-                }
-            }
+            Database.menus.stream()
+                    .filter(m -> m.getObjekat() != null && m.getObjekat().getId() == selectedId)
+                    .forEach(m -> menuChoiceBox.getItems().add(
+                            "Description: " + m.getOpis() + " | Price: " + m.getCijenaPoOsobi() + " KM"
+                    ));
 
             if (menuChoiceBox.getItems().isEmpty()) {
                 menuChoiceBox.setDisable(true);
@@ -106,7 +113,10 @@ public class ClientCelebrationReservation implements Initializable {
             return;
         }
 
-        Venue venue = Database.venues.stream().filter(v -> v.getId() == selectedVenueId).findFirst().orElse(null);
+        Venue venue = Database.venues.stream()
+                .filter(v -> v.getId() == selectedVenueId)
+                .findFirst().orElse(null);
+
         if (venue == null) {
             showAlert(Alert.AlertType.ERROR, "Error", "Venue not found.");
             return;
@@ -122,10 +132,10 @@ public class ClientCelebrationReservation implements Initializable {
             return;
         }
 
-        String loggedInUsername = Login.getClientUsername();
         Client client = Database.clients.stream()
-                .filter(c -> c.getKorisnickoIme().equals(loggedInUsername))
+                .filter(c -> c.getKorisnickoIme().equals(Login.getClientUsername()))
                 .findFirst().orElse(null);
+
         if (client == null) {
             showAlert(Alert.AlertType.ERROR, "Error", "No client data available for the logged-in user.");
             return;
@@ -135,6 +145,7 @@ public class ClientCelebrationReservation implements Initializable {
                 .filter(m -> m.getObjekat() != null && m.getObjekat().getId() == selectedVenueId
                         && ("Description: " + m.getOpis() + " | Price: " + m.getCijenaPoOsobi() + " KM").equals(selectedMenu))
                 .findFirst().orElse(null);
+
         if (menu == null) {
             showAlert(Alert.AlertType.ERROR, "Error", "Selected menu not found.");
             return;
@@ -147,12 +158,11 @@ public class ClientCelebrationReservation implements Initializable {
             return;
         }
 
-        String ownerAccountNumber = venue.getVlasnik().getBrojRacuna();
-        double ownerBalance = Database.getAccountBalance(ownerAccountNumber);
-
         try {
+            double ownerBalance = Database.getAccountBalance(venue.getVlasnik().getBrojRacuna());
+
             Database.updateClientBalance(client.getBrojRacuna(), clientBalance - reservationPrice);
-            Database.updateClientBalance(ownerAccountNumber, ownerBalance + reservationPrice);
+            Database.updateClientBalance(venue.getVlasnik().getBrojRacuna(), ownerBalance + reservationPrice);
 
             Celebration celebration = new Celebration(
                     0,
@@ -167,18 +177,17 @@ public class ClientCelebrationReservation implements Initializable {
             );
 
             Database.addCelebration(celebration);
-            List<LocalDate> datumi = venue.getDatumi() != null ? new ArrayList<>(venue.getDatumi()) : new ArrayList<>();
-            datumi.add(selectedDate);
-            String datumiString = String.join(",", datumi.stream().map(LocalDate::toString).toArray(String[]::new));
-            Database.updateVenueDates(selectedVenueId, datumiString);
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Reservation confirmed. New balance: $" + (clientBalance - reservationPrice));
+            updateVenueDates(selectedVenueId, selectedDate, venue);
+
+            showAlert(Alert.AlertType.INFORMATION, "Success",
+                    "Reservation confirmed. New balance: $" + (clientBalance - reservationPrice));
+
             Stage stage = (Stage) confirmReservation.getScene().getWindow();
             stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("client_venueList.fxml"))));
             stage.show();
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             showAlert(Alert.AlertType.ERROR, "Error", "Failed to confirm reservation: " + e.getMessage());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 

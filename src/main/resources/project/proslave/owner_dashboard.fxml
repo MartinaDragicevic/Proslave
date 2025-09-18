@@ -87,7 +87,7 @@
       </Label>
       <Pane layoutX="610.0" layoutY="284.0" prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: purple;" styleClass="round">
          <children>
-            <Label layoutX="29.0" layoutY="43.0" text="Add  New Venue">
+            <Label layoutX="29.0" layoutY="43.0" text="Add New Venue">
                <font>
                   <Font size="20.0" />
                </font>

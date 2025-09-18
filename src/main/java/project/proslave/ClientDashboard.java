@@ -1,7 +1,6 @@
 package project.proslave;
 
 import Database.Database;
-import SistemZaPlaniranjeProslava.BankAccount;
 import SistemZaPlaniranjeProslava.Client;
 import javafx.animation.PauseTransition;
 import javafx.event.ActionEvent;
@@ -29,32 +28,44 @@ public class ClientDashboard {
 
     public void initialize() {
         String loggedInUser = Login.getClientUsername();
-        if (loggedInUser != null) {
+        if (loggedInUser != null && Database.clients != null) {
             username.setText(loggedInUser);
             for (Client client : Database.clients) {
-                if (client.getKorisnickoIme().equals(loggedInUser)) {
+                if (client != null && client.getKorisnickoIme().equals(loggedInUser)) {
                     fullName.setText(client.getIme() + " " + client.getPrezime());
 
-                    double balance = Database.getAccountBalance(client.getBrojRacuna());
-                    accountBalance.setText(String.format("$%.2f", balance));
+                    try {
+                        double balance = Database.getAccountBalance(client.getBrojRacuna());
+                        accountBalance.setText(String.format("$%.2f", balance));
+                    } catch (Exception e) {
+                        accountBalance.setText("$0.00");
+                        e.printStackTrace();
+                    }
+                    break;
                 }
             }
+        } else {
+            fullName.setText("Nepoznat korisnik");
+            accountBalance.setText("$0.00");
         }
     }
 
     @FXML
-    private void changePassword(){
+    private void changePassword() {
         String current = currentPassword.getText().trim();
         String newPass = newPassword.getText().trim();
         String confirm = confirmPassword.getText().trim();
         String username = Login.getClientUsername();
 
-        if (current.isEmpty() || newPass.isEmpty() || confirm.isEmpty()){
-            showMessage("Please enter all fields.", Color.RED, 4); return;
-        }else if (!newPass.equals(confirm)){
-            showMessage("Passwords do not match.", Color.RED, 4); return;
+        if (current.isEmpty() || newPass.isEmpty() || confirm.isEmpty()) {
+            showMessage("Please enter all fields.", Color.RED, 4);
+            return;
+        }else if (!newPass.equals(confirm)) {
+            showMessage("Passwords do not match.", Color.RED, 4);
+            return;
         }else if (!Database.checkCurrentPassword(username, current)) {
-            showMessage("Incorrect current password.", Color.RED, 4); return;
+            showMessage("Incorrect current password.", Color.RED, 4);
+            return;
         }
 
         try {
@@ -67,7 +78,6 @@ public class ClientDashboard {
             showMessage("Error changing password: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Color.RED, 4);
             e.printStackTrace();
         }
-
     }
 
     private void showMessage(String message, Color color, double seconds) {

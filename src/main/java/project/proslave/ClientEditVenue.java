@@ -12,9 +12,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.scene.input.MouseEvent;
 
 import java.io.IOException;
 import java.net.URL;
@@ -41,6 +41,7 @@ public class ClientEditVenue implements Initializable {
         } else {
             venueName.setText("Nema dostupnih podataka o objektu");
         }
+
         cancelReservation.setOnAction(event -> handleCancelReservation());
         saveChanges.setOnAction(event -> handleSaveChanges());
     }
@@ -58,6 +59,8 @@ public class ClientEditVenue implements Initializable {
     }
 
     public void handleVenueMenu() {
+        menuChoiceBox.getItems().clear();
+
         if (selectedCelebration == null || selectedCelebration.getObjekat() == null) {
             menuChoiceBox.getItems().add("Nema dostupnih podataka o objektu");
             menuChoiceBox.setDisable(true);
@@ -65,15 +68,16 @@ public class ClientEditVenue implements Initializable {
         }
 
         int venueId = selectedCelebration.getObjekat().getId();
-        menuChoiceBox.getItems().clear();
-
         boolean menuFound = false;
+
         for (Menu menu : Database.menus) {
             if (menu.getObjekat() != null && menu.getObjekat().getId() == venueId) {
                 menuFound = true;
                 String menuEntry = "Description: " + menu.getOpis() + " | Price: " + menu.getCijenaPoOsobi() + " KM";
                 menuChoiceBox.getItems().add(menuEntry);
-                if (selectedCelebration.getMeni() != null && menu.getOpis().equals(selectedCelebration.getMeni().getOpis())
+
+                if (selectedCelebration.getMeni() != null
+                        && menu.getOpis().equals(selectedCelebration.getMeni().getOpis())
                         && menu.getCijenaPoOsobi() == selectedCelebration.getMeni().getCijenaPoOsobi()) {
                     menuChoiceBox.getSelectionModel().select(menuEntry);
                 }
@@ -90,20 +94,12 @@ public class ClientEditVenue implements Initializable {
 
     public void handleCancelReservation() {
         if (selectedCelebration == null) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Greška");
-            alert.setHeaderText(null);
-            alert.setContentText("Nema odabrane proslave za otkazivanje.");
-            alert.showAndWait();
+            showAlert(Alert.AlertType.ERROR, "Greška", "Nema odabrane proslave za otkazivanje.");
             return;
         }
 
         if (currentClient == null) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Greška");
-            alert.setHeaderText(null);
-            alert.setContentText("Klijent nije ispravno postavljen.");
-            alert.showAndWait();
+            showAlert(Alert.AlertType.ERROR, "Greška", "Klijent nije ispravno postavljen.");
             return;
         }
 
@@ -117,11 +113,7 @@ public class ClientEditVenue implements Initializable {
             String message;
 
             if (uplacenIznos <= 0) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Greška");
-                alert.setHeaderText(null);
-                alert.setContentText("Uplaćeni iznos je nevažeći: " + uplacenIznos + " KM");
-                alert.showAndWait();
+                showAlert(Alert.AlertType.ERROR, "Greška", "Uplaćeni iznos je nevažeći: " + uplacenIznos + " KM");
                 return;
             }
 
@@ -129,11 +121,7 @@ public class ClientEditVenue implements Initializable {
                 message = "Rezervacija otkazana, ali je proslava za manje od 3 dana. Vlasnik zadržava sav uplaćeni novac (" + uplacenIznos + " KM). Stanje na računu: " + clientBalance + " KM";
             } else {
                 if (ownerBalance < uplacenIznos) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Greška");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Vlasnik nema dovoljno sredstava za povrat novca: " + ownerBalance + " KM dostupno, potrebno: " + uplacenIznos + " KM");
-                    alert.showAndWait();
+                    showAlert(Alert.AlertType.ERROR, "Greška", "Vlasnik nema dovoljno sredstava za povrat novca: " + ownerBalance + " KM dostupno, potrebno: " + uplacenIznos + " KM");
                     return;
                 }
                 Database.transferMoney(selectedCelebration.getObjekat().getVlasnik().getBrojRacuna(),
@@ -146,39 +134,21 @@ public class ClientEditVenue implements Initializable {
             Venue venue = selectedCelebration.getObjekat();
             if (venue != null && venue.getDatumi() != null) {
                 List<LocalDate> datumi = new ArrayList<>(venue.getDatumi());
-                if (datumi.contains(selectedCelebration.getDatum())) {
-                    datumi.remove(selectedCelebration.getDatum());
-                    venue.setDatumi(datumi);
-                    String datumiString = datumi.isEmpty() ? "" : String.join(",", datumi.stream().map(LocalDate::toString).toArray(String[]::new));
-                    Database.updateVenueDates(venue.getId(), datumiString);
-                } else {
-                    System.out.println("Datum " + selectedCelebration.getDatum() + " nije pronađen u listi datuma za objekat " + venue.getNaziv());
-                }
-            } else {
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Upozorenje");
-                alert.setHeaderText(null);
-                alert.setContentText("Objekat ili lista datuma nisu dostupni.");
-                alert.showAndWait();
+                datumi.remove(selectedCelebration.getDatum());
+                venue.setDatumi(datumi);
+                String datumiString = datumi.isEmpty() ? "" : String.join(",", datumi.stream().map(LocalDate::toString).toArray(String[]::new));
+                Database.updateVenueDates(venue.getId(), datumiString);
             }
 
             Database.updateCelebrationProslavacol(selectedCelebration.getId(), "OTKAZANA");
             selectedCelebration.setProslavacol("OTKAZANA");
 
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Otkazivanje rezervacije");
-            alert.setHeaderText(null);
-            alert.setContentText(message);
-            alert.showAndWait();
+            showAlert(Alert.AlertType.INFORMATION, "Otkazivanje rezervacije", message);
 
             ClientReservedVenues.refreshCanceled(selectedCelebration);
             backToDashboard(null);
         } catch (SQLException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Greška");
-            alert.setHeaderText(null);
-            alert.setContentText("Greška prilikom otkazivanja rezervacije: " + e.getMessage());
-            alert.showAndWait();
+            showAlert(Alert.AlertType.ERROR, "Greška", "Greška prilikom otkazivanja rezervacije: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -187,11 +157,7 @@ public class ClientEditVenue implements Initializable {
         if (selectedCelebration == null || menuChoiceBox.getValue() == null ||
                 menuChoiceBox.getValue().equals("No menu for this venue.") ||
                 menuChoiceBox.getValue().equals("Nema dostupnih podataka o objektu")) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Greška");
-            alert.setHeaderText(null);
-            alert.setContentText("Odaberite validan meni.");
-            alert.showAndWait();
+            showAlert(Alert.AlertType.ERROR, "Greška", "Odaberite validan meni.");
             return;
         }
 
@@ -205,26 +171,14 @@ public class ClientEditVenue implements Initializable {
             try {
                 Database.updateCelebrationMenu(selectedCelebration.getId(), newMenu.getId());
                 selectedCelebration.setMeni(newMenu);
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Uspjeh");
-                alert.setHeaderText(null);
-                alert.setContentText("Promjene uspješno sačuvane.");
-                alert.showAndWait();
+                showAlert(Alert.AlertType.INFORMATION, "Uspjeh", "Promjene uspješno sačuvane.");
                 backToDashboard(null);
             } catch (SQLException e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Greška");
-                alert.setHeaderText(null);
-                alert.setContentText("Greška prilikom čuvanja promjena: " + e.getMessage());
-                alert.showAndWait();
+                showAlert(Alert.AlertType.ERROR, "Greška", "Greška prilikom čuvanja promjena: " + e.getMessage());
                 e.printStackTrace();
             }
         } else {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Greška");
-            alert.setHeaderText(null);
-            alert.setContentText("Greška: Odabrani meni nije validan.");
-            alert.showAndWait();
+            showAlert(Alert.AlertType.ERROR, "Greška", "Greška: Odabrani meni nije validan.");
         }
     }
 
@@ -234,12 +188,16 @@ public class ClientEditVenue implements Initializable {
             stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("client_reservedVenues.fxml"))));
             stage.show();
         } catch (IOException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Greška");
-            alert.setHeaderText(null);
-            alert.setContentText("Greška prilikom povratka na dashboard: " + e.getMessage());
-            alert.showAndWait();
+            showAlert(Alert.AlertType.ERROR, "Greška", "Greška prilikom povratka na dashboard: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

@@ -27,26 +27,28 @@ public class AdminDashboard {
 
     public void initialize() {
         String loggedInUser = Login.getAdminUsername();
-        if (loggedInUser != null) {
-            username.setText(loggedInUser);
-            for (Admin admin : Database.admins) {
-                if (admin.getKorisnickoIme().equals(loggedInUser)) {
-                    fullName.setText(admin.getIme() + " " + admin.getPrezime()); break;
-                }
-            }
+
+        username.setText(loggedInUser);
+        Admin matchedAdmin = Database.admins.stream()
+                .filter(a -> a.getKorisnickoIme().equals(loggedInUser))
+                .findFirst()
+                .orElse(null);
+
+        if (matchedAdmin != null) {
+            fullName.setText(matchedAdmin.getIme() + " " + matchedAdmin.getPrezime());
         }
     }
 
     @FXML
-    private void changePassword(){
+    private void changePassword() {
         String current = currentPassword.getText().trim();
         String newPass = newPassword.getText().trim();
         String confirm = confirmPassword.getText().trim();
         String username = Login.getAdminUsername();
 
-        if (current.isEmpty() || newPass.isEmpty() || confirm.isEmpty()){
+        if (current.isEmpty() || newPass.isEmpty() || confirm.isEmpty()) {
             showMessage("Please enter all fields.", Color.RED, 4); return;
-        }else if (!newPass.equals(confirm)){
+        }else if (!newPass.equals(confirm)) {
             showMessage("Passwords do not match.", Color.RED, 4); return;
         }else if (!Database.checkCurrentPassword(username, current)) {
             showMessage("Incorrect current password.", Color.RED, 4); return;
@@ -54,15 +56,19 @@ public class AdminDashboard {
 
         try {
             Database.changePassword(newPass, username, "admin");
-            currentPassword.clear();
-            newPassword.clear();
-            confirmPassword.clear();
+            clearPasswordFields();
             showMessage("Password changed successfully!", Color.GREEN, 4);
         } catch (Exception e) {
-            showMessage("Error changing password: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Color.RED, 4);
+            String error = (e.getMessage() != null) ? e.getMessage() : "Unknown error";
+            showMessage("Error changing password: " + error, Color.RED, 4);
             e.printStackTrace();
         }
+    }
 
+    private void clearPasswordFields() {
+        currentPassword.clear();
+        newPassword.clear();
+        confirmPassword.clear();
     }
 
     private void showMessage(String message, Color color, double seconds) {
@@ -70,19 +76,23 @@ public class AdminDashboard {
         errorLabel.setTextFill(color);
 
         PauseTransition delay = new PauseTransition(Duration.seconds(seconds));
-        delay.setOnFinished(event -> errorLabel.setText(""));
+        delay.setOnFinished(e -> errorLabel.setText(""));
         delay.play();
     }
 
     public void logout(ActionEvent event) throws IOException {
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("login.fxml"))));
-        stage.show();
+        switchScene(event, "login.fxml");
     }
 
     public void venueRequests(ActionEvent event) throws IOException {
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("admin_venueList.fxml"))));
+        switchScene(event, "admin_venueList.fxml");
+    }
+
+    private void switchScene(ActionEvent event, String fxmlFile) throws IOException {
+        Node source = (Node) event.getSource();
+        Stage stage = (Stage) source.getScene().getWindow();
+        Scene newScene = new Scene(FXMLLoader.load(getClass().getResource(fxmlFile)));
+        stage.setScene(newScene);
         stage.show();
     }
 }

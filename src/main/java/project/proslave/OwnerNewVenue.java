@@ -42,14 +42,13 @@ public class OwnerNewVenue {
         String price = reservationPrice.getText().trim();
         String menuInput = textArea.getText().trim();
 
-        if (name.isEmpty() || address.isEmpty() || place.isEmpty() || maxSeats.isEmpty() ||
-                seatsPerTableStr.isEmpty() || tables.isEmpty() || price.isEmpty() || menuInput.isEmpty()) {
+        if (hasEmptyField(name, address, place, maxSeats, seatsPerTableStr, tables, price, menuInput)) {
             showAlert(Alert.AlertType.ERROR, "Error", "Please fill out all fields!");
             return;
         }
 
-        if (!isPositiveInteger(maxSeats) || !isPositiveInteger(seatsPerTableStr) ||
-                !isPositiveInteger(tables) || !isPositiveDecimal(price)) {
+        if (!isPositiveInteger(maxSeats) || !isPositiveInteger(seatsPerTableStr)
+                || !isPositiveInteger(tables) || !isPositiveDecimal(price)) {
             showAlert(Alert.AlertType.ERROR, "Error", "Ensure numeric fields contain positive numbers.");
             return;
         }
@@ -60,51 +59,57 @@ public class OwnerNewVenue {
         double priceDouble = Double.parseDouble(price);
 
         if (maxSeatsInt < seatsPerTableInt * tablesInt) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Total seats must be at least " +
-                    (seatsPerTableInt * tablesInt) + " (seats per table × number of tables).");
+            showAlert(Alert.AlertType.ERROR, "Error",
+                    "Total seats must be at least " + (seatsPerTableInt * tablesInt) +
+                            " (seats per table × number of tables).");
             return;
         }
 
         List<Menu> menus = parseMenus(menuInput);
         if (menus.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Please provide at least one valid menu (format: description: price).");
+            showAlert(Alert.AlertType.ERROR, "Error",
+                    "Please provide at least one valid menu (format: description: price).");
             return;
         }
 
         try {
-            Venue newVenue = new Venue(0, new Owner(currentVlasnikId, "", "", "", "", "", ""), name, priceDouble, place, address, maxSeatsInt, tablesInt, new ArrayList<>(), 0.0, "NA ČEKANJU");
-            Database.addVenue(newVenue, tablesInt, seatsPerTableInt, menus);
+            Venue newVenue = new Venue(
+                    0,
+                    new Owner(currentVlasnikId, "", "", "", "", "", ""),
+                    name, priceDouble, place, address,
+                    maxSeatsInt, tablesInt, new ArrayList<>(), 0.0, "NA ČEKANJU"
+            );
 
+            Database.addVenue(newVenue, tablesInt, seatsPerTableInt, menus);
             Database.venues = Database.retrieveDataFromTable("objekat", Venue.class);
             Database.menus = Database.retrieveDataFromTable("meni", Menu.class);
 
             showAlert(Alert.AlertType.INFORMATION, "Success", "Venue added successfully!");
-            venueName.clear();
-            venueAddress.clear();
-            venuePlace.clear();
-            maxSeatsNumber.clear();
-            peopleNumber.clear();
-            tablesNumber.clear();
-            reservationPrice.clear();
-            textArea.clear();
+            clearFields();
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to add venue: " + e.getMessage());
         }
     }
 
+    private boolean hasEmptyField(String... values) {
+        for (String v : values) {
+            if (v.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean isPositiveInteger(String str) {
         try {
-            int value = Integer.parseInt(str);
-            return value > 0;
+            return Integer.parseInt(str) > 0;
         } catch (NumberFormatException e) {
             return false;
         }
     }
-
     private boolean isPositiveDecimal(String str) {
         try {
-            double value = Double.parseDouble(str);
-            return value > 0;
+            return Double.parseDouble(str) > 0;
         } catch (NumberFormatException e) {
             return false;
         }
@@ -112,8 +117,7 @@ public class OwnerNewVenue {
 
     private List<Menu> parseMenus(String input) {
         List<Menu> menus = new ArrayList<>();
-        String[] menuLines = input.replace("\r\n", "\n").split("\n");
-        for (String line : menuLines) {
+        for (String line : input.replace("\r\n", "\n").split("\n")) {
             String[] parts = line.trim().split(": ", 2);
             if (parts.length == 2) {
                 String description = parts[0].trim();
@@ -129,6 +133,17 @@ public class OwnerNewVenue {
             }
         }
         return menus;
+    }
+
+    private void clearFields() {
+        venueName.clear();
+        venueAddress.clear();
+        venuePlace.clear();
+        maxSeatsNumber.clear();
+        peopleNumber.clear();
+        tablesNumber.clear();
+        reservationPrice.clear();
+        textArea.clear();
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {
