@@ -363,6 +363,110 @@ public class Database {
         }
     }
 
+    public static int getTableSeats(int venueId) throws SQLException {
+        int totalSeats = 0;
+        String query = "SELECT SUM(broj_mjesta) AS total_seats FROM sto WHERE Objekat_id = ?";
+        try {
+            DBConnect();
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setInt(1, venueId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                totalSeats = rs.getInt("total_seats");
+            }
+            rs.close();
+            ps.close();
+        } finally {
+            if (connection != null) connection.close();
+        }
+        return totalSeats;
+    }
+
+    public static List<Table> getTablesByVenueId(int venueId) throws SQLException {
+        List<Table> tablesList = new ArrayList<>();
+        String query = "SELECT id, broj_mjesta, Objekat_id FROM sto WHERE Objekat_id = ?";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            DBConnect();
+            conn = connection;
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, venueId);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Table table = new Table();
+                table.setId(rs.getInt("id"));
+                table.setBrojMjesta(rs.getInt("broj_mjesta"));
+                int objekatId = rs.getInt("Objekat_id");
+                Venue venue = venues.stream().filter(v -> v.getId() == objekatId).findFirst().orElse(null);
+                if (venue == null) {
+                    System.out.println("No venue found for Objekat_id: " + objekatId);
+                }
+                table.setObjekat(venue);
+                tablesList.add(table);
+            }
+        } finally {
+            if (rs != null) rs.close();
+            if (ps != null) ps.close();
+            if (conn != null) conn.close();
+        }
+        return tablesList;
+    }
+
+    public static List<String> getGuestsForTableAndCelebration(int tableId, int celebrationId) throws SQLException {
+        List<String> guests = new ArrayList<>();
+        String query = "SELECT gosti FROM raspored WHERE idSto = ? AND idProslava = ?";
+        try (Connection conn = DriverManager.getConnection(connectionUrl, DB_user, DB_password);
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, tableId);
+            ps.setInt(2, celebrationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String guestsString = rs.getString("gosti");
+                    if (guestsString != null && !guestsString.isEmpty()) {
+                        // Razdvoji string po zarezima, očuvajući cijele riječi
+                        String[] guestArray = guestsString.split("", -1); // -1 očuva prazne elemente
+                        for (String guest : guestArray) {
+                            guests.add(guest.trim()); // Ukloni eventualne razmake
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println("Dohvaćeni gosti za sto ID: " + tableId + ", proslava ID: " + celebrationId + ": " + guests);
+        return guests;
+    }
+
+    public static void saveGuestsForTableAndCelebration(int tableId, int celebrationId, List<String> guests) throws SQLException {
+        String deleteQuery = "DELETE FROM raspored WHERE idSto = ? AND idProslava = ?";
+        String insertQuery = "INSERT INTO raspored (idSto, idProslava, gosti) VALUES (?, ?, ?)";
+        try (Connection conn = DriverManager.getConnection(connectionUrl, DB_user, DB_password)) {
+            conn.setAutoCommit(false); // Počni transakciju
+            try (PreparedStatement deletePs = conn.prepareStatement(deleteQuery);
+                 PreparedStatement insertPs = conn.prepareStatement(insertQuery)) {
+                // Obriši postojeće zapise
+                deletePs.setInt(1, tableId);
+                deletePs.setInt(2, celebrationId);
+                deletePs.executeUpdate();
+
+                // Spoji goste u string odvojen zarezima
+                String guestsString = String.join(",", guests);
+                insertPs.setInt(1, tableId);
+                insertPs.setInt(2, celebrationId);
+                insertPs.setString(3, guestsString.isEmpty() ? "" : guestsString);
+                insertPs.executeUpdate();
+
+                conn.commit(); // Potvrdi transakciju
+                System.out.println("Spremljeni gosti za sto ID: " + tableId + ", proslava ID: " + celebrationId + ": " + guestsString);
+            } catch (SQLException e) {
+                conn.rollback(); // Vrati promjene u slučaju greške
+                throw e;
+            }
+        }
+    }
+
+
     public static void updateCelebrationProslavacol(int celebrationId, String proslavacol) throws SQLException {
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -587,8 +691,17 @@ public class Database {
                         } else if (columnName.equals("zarada")) columnName = "zarada";
                         else if (columnName.equals("status")) columnName = "status";
                     } else if (tableName.equals("sto")) {
-                        if (columnName.equals("capacity")) columnName = "broj_mjesta";
-                        else if (columnName.equals("objekatId")) columnName = "Objekat_id";
+                        if (columnName.equals("id")) columnName = "id";
+                        else if (columnName.equals("broj_mjesta")) columnName = "broj_mjesta";
+                        else if (columnName.equals("objekat")) {
+                            int venueId = resultSet.getInt("Objekat_id");
+                            Venue venue = (venues != null) ? venues.stream().filter(v -> v.getId() == venueId).findFirst().orElse(null) : null;
+                            if (venue == null) {
+                                System.out.println("No venue found for Objekat_id: " + venueId);
+                            }
+                            field.set(obj, venue);
+                            continue;
+                        }
                     } else if (tableName.equals("meni")) {
                         if (columnName.equals("description")) columnName = "opis";
                         else if (columnName.equals("price")) columnName = "cijena_po_osobi";

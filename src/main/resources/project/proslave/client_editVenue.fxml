@@ -5,6 +5,8 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
@@ -24,37 +26,43 @@
                 <Font name="Berlin Sans FB" size="25.0" />
             </font>
         </Text>
-      <Rectangle arcHeight="5.0" arcWidth="5.0" height="429.0" layoutX="239.0" layoutY="173.0" stroke="BLACK" strokeType="INSIDE" width="722.0" />
-      <Button fx:id="cancelReservation" layoutX="682.0" layoutY="342.0" mnemonicParsing="false" onAction="#handleCancelReservation" prefHeight="35.0" prefWidth="208.0" style="-fx-background-color: red;" styleClass="round" stylesheets="@../../css/css_file.css" text="Cancel Reservation" textFill="WHITE">
+      <Rectangle arcHeight="5.0" arcWidth="5.0" height="491.0" layoutX="129.0" layoutY="105.0" stroke="BLACK" strokeType="INSIDE" width="926.0" />
+      <Button fx:id="cancelReservation" layoutX="162.0" layoutY="538.0" mnemonicParsing="false" onAction="#cancelVenueReservation" prefHeight="35.0" prefWidth="208.0" style="-fx-background-color: red;" styleClass="round" stylesheets="@../../css/css_file.css" text="Cancel Reservation" textFill="WHITE">
          <font>
             <Font name="System Bold" size="16.0" />
          </font>
       </Button>
-      <Text fill="WHITE" layoutX="376.0" layoutY="416.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Menu">
+      <Text fill="WHITE" layoutX="237.0" layoutY="382.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Menu">
          <font>
             <Font name="Berlin Sans FB" size="23.0" />
          </font>
       </Text>
-      <Button fx:id="saveChanges" layoutX="682.0" layoutY="399.0" mnemonicParsing="false" onAction="#handleSaveChanges" prefHeight="35.0" prefWidth="208.0" style="-fx-background-color: green;" styleClass="round" stylesheets="@../../css/css_file.css" text="Save Changes" textFill="WHITE">
+      <Button fx:id="saveChanges" layoutX="162.0" layoutY="471.0" mnemonicParsing="false" onAction="#saveVenueChanges" prefHeight="35.0" prefWidth="208.0" style="-fx-background-color: green;" styleClass="round" stylesheets="@../../css/css_file.css" text="Save Changes" textFill="WHITE">
          <font>
             <Font name="System Bold" size="16.0" />
          </font>
       </Button>
-      <Button layoutX="299.0" layoutY="248.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="208.0" style="-fx-background-color: white;" styleClass="round" stylesheets="@../../css/css_file.css" text="Change Seating">
+      <Button layoutX="160.0" layoutY="214.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="208.0" style="-fx-background-color: white;" styleClass="round" stylesheets="@../../css/css_file.css" text="Change Seating">
          <font>
             <Font name="System Bold" size="16.0" />
          </font>
       </Button>
-      <Button layoutX="299.0" layoutY="296.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="208.0" style="-fx-background-color: white;" styleClass="round" stylesheets="@../../css/css_file.css" text="Print ">
+      <Button layoutX="160.0" layoutY="262.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="208.0" style="-fx-background-color: white;" styleClass="round" stylesheets="@../../css/css_file.css" text="Print ">
          <font>
             <Font name="System Bold" size="16.0" />
          </font>
       </Button>
-      <Text fx:id="venueName" fill="WHITE" layoutX="384.0" layoutY="209.0" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="432.9736328125">
+      <Text fx:id="venueName" fill="WHITE" layoutX="376.0" layoutY="126.0" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="432.9736328125">
          <font>
             <Font name="Berlin Sans FB" size="23.0" />
          </font>
       </Text>
-      <ChoiceBox fx:id="menuChoiceBox" layoutX="299.0" layoutY="441.0" prefHeight="27.0" prefWidth="208.0" />
+      <ChoiceBox fx:id="menuChoiceBox" layoutX="160.0" layoutY="407.0" prefHeight="27.0" prefWidth="208.0" />
+      <Pane fx:id="venuePane" layoutX="453.0" layoutY="170.0" prefHeight="396.0" prefWidth="551.0" style="-fx-background-color: black;">
+         <children>
+            <Circle fx:id="circle" fill="#ff1f1f" layoutX="276.0" layoutY="198.0" radius="91.0" stroke="BLACK" strokeType="INSIDE" />
+         </children>
+      </Pane>
+      <ChoiceBox fx:id="tables" layoutX="854.0" layoutY="138.0" prefWidth="150.0" />
     </children>
 </AnchorPane>
